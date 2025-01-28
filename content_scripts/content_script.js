@@ -1,9 +1,9 @@
 (() => {
-    console.log('content_script loaded');
-    /**
-     * Check and set a global guard variable.
-     * If this content script is injected into the same page again, it will do nothing next time.
-     */
+    // TODO: let user enter document content
+    // TODO: let user enter API key
+    // TODO: perform HTTP call to OpenRouter (or similar)
+
+    // prevent script from running twice
     if (window.hasRun) {
         return;
     }
@@ -52,7 +52,7 @@
                 inputs.push(input);
             }
         });
-        console.log(JSON.stringify(inputs, null, 2));
+        // console.log(JSON.stringify(inputs, null, 2));
 
         // to set a value back into the form
         // if (element.hasAttribute('value')) {
@@ -60,12 +60,10 @@
         // }
     }
 
-    /**
-     * Listen for messages from the background script.
-     */
+    // listen for messages from the background script.
     browser.runtime.onMessage.addListener((message) => {
-        console.log(`onMessage: ${message}`);
-        // Call the function to log form elements
+        console.log(`onMessage: ${JSON.stringify(message)}`);
+        // call the function to log form elements
         logFormElements();
     });
 })();
