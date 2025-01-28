@@ -1,0 +1,19 @@
+{
+  "manifest_version": 2,
+  "name": "Extension",
+  "version": "0.2",
+
+  "description": "Testing out extensions.",
+
+  "icons": {
+    "48": "assets/border-48.png"
+  },
+
+  "permissions": ["activeTab"],
+
+  "browser_action": {
+    "default_icon": "assets/border-48.png",
+    "default_title": "Some Testing",
+    "default_popup": "popup/popup.html"
+  }
+}
