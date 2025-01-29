@@ -4,14 +4,15 @@
   "version": "0.2",
   "description": "Testing out extensions.",
   "icons": {
-    "48": "assets/border-48.png"
+    "48": "assets/logo_48.png",
+    "96": "assets/logo_96.png"
   },
   "permissions": [
     "activeTab",
     "https://openrouter.ai/api/v1/*"
   ],
   "browser_action": {
-    "default_icon": "assets/border-48.png",
+    "default_icon": "assets/logo_96.png",
     "default_title": "Some Testing",
     "default_popup": "popup/popup.html"
   }

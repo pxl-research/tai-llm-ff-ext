@@ -1,12 +1,16 @@
 html,
 body {
-    width: 640px;
-    height: 480px;
+    width: 600px;
+    height: 600px;
 }
 
 button {
     margin: 10px;
     min-width: 150px;
+}
+
+textarea {
+    min-height: 150px;
 }
 
 .hidden {
