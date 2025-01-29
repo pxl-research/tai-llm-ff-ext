@@ -1,5 +1,4 @@
 (() => {
-    // TODO: let user enter document content
     // TODO: let user enter API key
     // TODO: perform HTTP call to OpenRouter (or similar)
 
@@ -9,7 +8,7 @@
     }
     window.hasRun = true;
 
-    function logFormElements() {
+    function fillOutForm() {
 
         // all human-readable text
         console.log(document.body.innerText);
@@ -27,11 +26,12 @@
         // }
 
         // collect info on all input elements in the document
+        // TODO: process select options
+        // TODO: process all types separately?
         const formElements = document.querySelectorAll('input, select, textarea');
         const inputs = [];
         formElements.forEach(element => {
             if (element.getAttribute('type') !== 'hidden') {
-                console.log(element);
                 const elementId = element.getAttribute('id');
                 const input = {
                     'tag': element.tagName.toLowerCase(),
@@ -52,7 +52,7 @@
                 inputs.push(input);
             }
         });
-        // console.log(JSON.stringify(inputs, null, 2));
+        console.log(JSON.stringify(inputs, null, 2));
 
         // to set a value back into the form
         // if (element.hasAttribute('value')) {
@@ -62,8 +62,8 @@
 
     // listen for messages from the background script.
     browser.runtime.onMessage.addListener((message) => {
-        console.log(`onMessage: ${JSON.stringify(message)}`);
-        // call the function to log form elements
-        logFormElements();
+        console.log(`onMessage: ${JSON.stringify(message, null, 2)}`);
+        // call the function to process form elements
+        fillOutForm(message);
     });
 })();

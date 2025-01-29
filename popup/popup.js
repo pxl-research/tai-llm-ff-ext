@@ -1,16 +1,20 @@
 function listenForClicks() {
-    document.addEventListener('click', (e) => {
+    const CLICK = 'click';
+
+    document.addEventListener(CLICK, (e) => {
 
         // get user entered data
         const txUserData = document.getElementById('user_data');
 
         // send a message to the content script in the active tab.
         function performAction(tabs) {
-            browser.tabs.sendMessage(tabs[0].id, {
-                command: 'logFormElements',
-                target: e.target.textContent,
-                userData: txUserData.value
-            });
+            browser.tabs.sendMessage(tabs[0].id,
+                {
+                    command: CLICK,
+                    target: e.target.id,
+                    label: e.target.textContent.trim(),
+                    userData: txUserData.value.trim()
+                });
         }
 
         function reportError(error) {
@@ -19,8 +23,7 @@ function listenForClicks() {
 
         // get the active tab, then call a method as appropriate.
         if (e.target.tagName !== 'BUTTON' || !e.target.closest('#popup-content')) {
-            // ignore when click is not on a button within <div id='popup-content'>.
-            return;
+            return; // ignore when click is not on a button within <div id='popup-content'>.
         } else {
             browser.tabs
                 .query({active: true, currentWindow: true})
