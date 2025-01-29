@@ -17,7 +17,8 @@ function listenForClicks() {
                         command: CLICK,
                         target: e.target.id,
                         label: e.target.textContent.trim(),
-                        userData: txUserData.value.trim()
+                        userData: txUserData.value.trim(),
+                        apiKey: txOrKey.value.trim()
                     });
             } else if (e.target.id === 'save_or_key') {
                 // store the key in local storage TODO: encrypt
