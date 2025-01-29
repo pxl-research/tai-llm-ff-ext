@@ -4,19 +4,27 @@
 <head>
     <title>Plugin</title>
     <meta charset="utf-8"/>
-    <link rel="stylesheet" href="popup.css"/>
 
     <!-- Milligram CSS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+
+    <link rel="stylesheet" href="popup.css"/>
 </head>
 
 <body>
 <div id="popup-content">
+    <div style="margin-bottom: 25px;">
+        <h2>
+            <img src="../assets/logo.png" alt="logo"
+                 style="height: 60px; vertical-align: middle;"/>
+            Pixie Lite Plug-in
+        </h2>
+    </div>
     <div>
         <label for="user_data">Enter the contents of your document here:</label>
-        <textarea id="user_data" rows="8" cols="50" placeholder="Document text...">
+        <textarea id="user_data" rows="5" cols="50" placeholder="Document text...">
 My name is Jonathan Anderson.
 My gmail address is just my first and last name before the @.
 I was born on november 5th 1981.
@@ -32,9 +40,9 @@ I want to know if I need to be able to speak French to work in Canada.
         </button>
     </div>
 
-    <div style="margin-top: 100px;">
+    <div style="margin-top: 50px;">
         <label for="or_key">Enter OpenRouter key:</label>
-        <input type="password" id="or_key" placeholder="sk-or-v1-f3a...907" />
+        <input type="password" id="or_key" placeholder="sk-or-v1-f3a...907"/>
         <button id="save_or_key" class="button">
             Save key
         </button>
