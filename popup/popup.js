@@ -51,6 +51,24 @@ function reportExecuteScriptError(error) {
     console.error(`Failed to execute content script: ${error.message}`);
 }
 
+browser.runtime.onMessage.addListener((message, sender) => {
+    console.log(`browser.runtime.onMessage: ${JSON.stringify(message)}`);
+
+
+    const progressBar = document.getElementById('progress_bar');
+    switch (message.state) {
+        case 1: // running
+            progressBar.style.display = 'inline-block';
+            break;
+        default: // not running
+            progressBar.style.display = 'none';
+            break;
+    }
+
+    const debugMsg = document.getElementById('debug_msg');
+    debugMsg.innerText = message.message;
+});
+
 // when the popup loads, inject the content script into the active tab
 browser.tabs
     .executeScript({file: '/content_scripts/content_script.js'})

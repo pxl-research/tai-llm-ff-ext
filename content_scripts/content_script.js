@@ -55,7 +55,13 @@
         }
     }
 
-    // UI EVENT
+    // UI LOGIC
+    const ST_DEFAULT = 0;
+    const ST_RUNNING = 1;
+    const ST_DONE = 2;
+    const ST_PROBLEM = -1;
+
+
     function fillOutForm(msg) {
 
         // collect all the form labels
@@ -109,10 +115,10 @@
         ];
 
         // call the LLM
-        console.log(`Asking LLM for input ...`);
+        postMessage(`Asking LLM for input ...`, ST_RUNNING);
         callOpenRouter(messages, msg.apiKey)
             .then((llmResult) => {
-                console.log(`LLM answer received.`);
+                postMessage(`LLM answer received.`, ST_RUNNING);
                 if (llmResult.hasOwnProperty('choices')) {
                     if (llmResult.choices.length > 0) {
                         if (llmResult.choices[0].hasOwnProperty('message')) {
@@ -144,11 +150,20 @@
                 }
             }
         }
+        postMessage('Finished processing', ST_DONE);
+    }
+
+    function postMessage(msg = '', state = ST_DEFAULT) {
+        browser.runtime.sendMessage({
+            'from': 'content_script',
+            'message': msg,
+            'state': state
+        });
     }
 
     // listen for messages from the background script.
     browser.runtime.onMessage.addListener((message) => {
-        console.log('onMessage received');
+        postMessage('Started processing', ST_RUNNING);
         // call the function to process form elements
         fillOutForm(message);
     });

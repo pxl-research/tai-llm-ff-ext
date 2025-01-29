@@ -22,6 +22,7 @@
             Pixie Lite Plug-in
         </h2>
     </div>
+
     <div>
         <label for="user_data">Enter the contents of your document here:</label>
         <textarea id="user_data" rows="5" cols="50" placeholder="Document text...">
@@ -31,13 +32,19 @@ I was born on november 5th 1981.
 I want to know if I need to be able to speak French to work in Canada.
         </textarea>
     </div>
-    <div>
+
+    <div id="buttons">
         <button id="fill_out_form" class="button">
             Fill out form
         </button>
-        <button id="reset_form" type="reset" class="button button-outline">
+        <button id="reset_form" type="reset" class="button button-outline" style="display: none">
             Reset
         </button>
+    </div>
+
+    <div id="progress_bar" style="display: none">
+        <progress id="progress"></progress>
+        <p><small><span id="debug_msg"></span></small></p>
     </div>
 
     <div style="margin-top: 50px;">
