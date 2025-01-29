@@ -1,20 +1,28 @@
 function listenForClicks() {
     const CLICK = 'click';
 
-    document.addEventListener(CLICK, (e) => {
+    const txOrKey = document.getElementById('or_key');
+    const txUserData = document.getElementById('user_data');
+    txOrKey.value = localStorage.getItem('or_key');
 
-        // get user entered data
-        const txUserData = document.getElementById('user_data');
+    document.addEventListener(CLICK, (e) => {
 
         // send a message to the content script in the active tab.
         function performAction(tabs) {
-            browser.tabs.sendMessage(tabs[0].id,
-                {
-                    command: CLICK,
-                    target: e.target.id,
-                    label: e.target.textContent.trim(),
-                    userData: txUserData.value.trim()
-                });
+
+            if (e.target.id === 'fill_out_form') {
+                // get user entered data and pass to content script
+                browser.tabs.sendMessage(tabs[0].id,
+                    {
+                        command: CLICK,
+                        target: e.target.id,
+                        label: e.target.textContent.trim(),
+                        userData: txUserData.value.trim()
+                    });
+            } else if (e.target.id === 'save_or_key') {
+                // store the key in local storage TODO: encrypt
+                localStorage.setItem('or_key', txOrKey.value.trim());
+            }
         }
 
         function reportError(error) {
