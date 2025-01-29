@@ -109,9 +109,10 @@
         ];
 
         // call the LLM
+        console.log(`Asking LLM for input ...`);
         callOpenRouter(messages, msg.apiKey)
             .then((llmResult) => {
-                console.log(JSON.stringify(llmResult, null, 2));
+                console.log(`LLM answer received.`);
                 if (llmResult.hasOwnProperty('choices')) {
                     if (llmResult.choices.length > 0) {
                         if (llmResult.choices[0].hasOwnProperty('message')) {
@@ -147,7 +148,7 @@
 
     // listen for messages from the background script.
     browser.runtime.onMessage.addListener((message) => {
-        console.log(`onMessage: ${JSON.stringify(message, null, 2)}`);
+        console.log('onMessage received');
         // call the function to process form elements
         fillOutForm(message);
     });
