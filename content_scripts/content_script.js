@@ -14,7 +14,7 @@
         'Content-Type': 'application/json',
         'Access-Control-Allow-Origin': '*'
     };
-    const defaultModel = 'openai/gpt-4o-mini-2024-07-18';
+    const defaultModel = 'google/gemini-2.0-flash-001';
 
     const systemPrompt = {
         'role': 'system',
@@ -23,11 +23,12 @@
             ' - the readable text of the webpage ' +
             ' - a list of all form input elements, with their "id", "label" and more ' +
             ' - a (potentially large) block of text that may contain information to fill out the form ' +
-            'Please return a valid JSON array (no markup) with the following information: ' +
+            'Please return a valid JSON array with the following information: ' +
             ' - the "id" of the element ' +
             ' - the suggested "value" for the element ' +
             'If you want to add additional information you may add a "remark" field to pass it on, ' +
-            'but always ensure the result is a valid JSON array.'
+            'but always ensure the result is a valid JSON array. ' +
+            'Make absolutely sure you DO NOT include any markup such as ```, ```json or any other markup. '
     };
 
     async function callOpenRouter(messages, apiKey, modelStr = defaultModel) {
@@ -61,6 +62,11 @@
     const ST_DONE = 2;
     const ST_PROBLEM = -1;
 
+    function getShortHash() {
+        const nr = Math.random();
+        const str = nr.toString(36);
+        return str.substring(2);
+    }
 
     function fillOutForm(msg) {
 
@@ -80,7 +86,11 @@
         const inputs = [];
         formElements.forEach(element => {
             if (element.getAttribute('type') !== 'hidden') {
-                const elementId = element.getAttribute('id');
+                let elementId = element.getAttribute('id');
+                if (!elementId) {
+                    elementId = getShortHash();
+                    element.setAttribute('id', elementId);
+                }
                 const input = {
                     'tag': element.tagName.toLowerCase(),
                     'id': elementId
@@ -100,6 +110,7 @@
                 inputs.push(input);
             }
         });
+        console.log(JSON.stringify(inputs, null, 2));
 
         let promptText = 'Please fill out the form using this information:\n ';
         promptText += `A. The text of the webpage: \n--START--\n ${document.body.innerText} \n--END--\n`;
@@ -123,10 +134,18 @@
                     if (llmResult.choices.length > 0) {
                         if (llmResult.choices[0].hasOwnProperty('message')) {
                             const message = llmResult.choices[0].message;
+
                             if (message.hasOwnProperty('content')) {
                                 console.log(message.content);
-                                // TODO error checking
-                                const suggestedValues = JSON.parse(message.content);
+                                let rawContent = message.content;
+                                // TODO error checking on response format
+                                if (rawContent.startsWith('```json')) {
+                                    rawContent = rawContent.substring(8, rawContent.length);
+                                }
+                                if (rawContent.endsWith('```')) {
+                                    rawContent = rawContent.substring(0, rawContent.length - 3);
+                                }
+                                const suggestedValues = JSON.parse(rawContent);
                                 processResult(suggestedValues);
                             }
                         }
@@ -140,14 +159,18 @@
             const element = document.getElementById(result.id);
             if (element) {
                 console.log(`Setting ${result.id} to ${result.value}`);
-                if (element.tagName.toLowerCase() === 'input') {
-                    element.setAttribute('value', result.value);
-                } else if (element.tagName.toLowerCase() === 'textarea' ||
-                    element.tagName.toLowerCase() === 'select') {
+                if (element.tagName.toLowerCase() === 'input' || element.tagName.toLowerCase() === 'textarea') {
+                    // fake user input
+                    element.focus();
+                    document.execCommand('insertText', false, result.value);
+                    // element.setAttribute('value', result.value);
+                } else if (element.tagName.toLowerCase() === 'select') {
                     element.value = result.value;
                 } else {
                     console.warn(`Setting ${result.id} to ${result.value} failed`);
                 }
+            } else {
+                console.warn(`Could not find element with id ${result.id}`);
             }
         }
         postMessage('Finished processing', ST_DONE);
