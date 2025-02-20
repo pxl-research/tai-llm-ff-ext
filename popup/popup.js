@@ -71,6 +71,6 @@ browser.runtime.onMessage.addListener((message, sender) => {
 
 // when the popup loads, inject the content script into the active tab
 browser.tabs
-    .executeScript({file: '/content_scripts/content_script.js'})
+    .executeScript({file: '/scripts/content_script.js'})
     .then(listenForClicks)
     .catch(reportExecuteScriptError);

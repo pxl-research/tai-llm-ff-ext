@@ -15,5 +15,14 @@
     "default_icon": "assets/logo_96.png",
     "default_title": "Some Testing",
     "default_popup": "popup/popup.html"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "js": [
+        "scripts/dom_tools.js",
+        "scripts/content_script.js"
+      ]
+    }
+  ]
 }
