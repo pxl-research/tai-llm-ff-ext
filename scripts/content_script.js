@@ -85,21 +85,37 @@
 
             const element = document.querySelector(`[path="${result.path}"]`);
             if (element) { // fake user input
-                console.log(`Setting ${result.path} of type ${element.tagName.toLowerCase()} to ${result.value}`);
+                const tagName = element.tagName.toLowerCase();
+
+                console.log(`Setting ${result.path} of type ${tagName} to ${result.value}`);
                 element.focus(); // focus on element
 
-                if (element.tagName.toLowerCase() === 'input' || element.tagName.toLowerCase() === 'textarea') {
-                    // "type" in the value
-                    document.execCommand('insertText', false, result.value);
-                } else if (element.tagName.toLowerCase() === 'select') {
+                if (element.hasAttribute('value') /* || tagName === 'select' */) {
                     // set the value
                     element.value = result.value;
-                } else if (element.tagName.toLowerCase() === 'span' || element.tagName.toLowerCase() === 'div') {
+                    console.info(`Setting the value in ${tagName}`);
+                }
+
+                if (tagName === 'input' || tagName === 'textarea') {
+                    // "type" in the value
+                    document.execCommand('insertText', false, result.value);
+                    console.info(`Typing the value in ${tagName}`);
+                } else if (tagName === 'span' || tagName === 'div') {
                     // "click" on the element
                     element.click();
-                    element.value = result.value;
+                    console.info(`Clicking on ${tagName}`);
+
+                    // some custom code for ql-editor >_<
+                    const classes = element.getAttribute('class');
+                    if (classes && classes.contains('ql-editor')) {
+                        // TODO: select the <p> tag below this
+                        // "type" in the value
+                        document.execCommand('insertText', false, result.value);
+                        console.info(`Typing the value in ${tagName}`);
+                    }
+
                 } else {
-                    console.warn(`Setting ${result.path} to ${result.value} failed`);
+                    console.warn(`I don't know what to do with ${result.path} of type ${tagName}`);
                 }
 
                 element.blur(); // unfocus the element
