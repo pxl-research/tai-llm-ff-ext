@@ -21,6 +21,7 @@
       "matches": ["<all_urls>"],
       "js": [
         "scripts/dom_tools.js",
+        "scripts/llm_tools.js",
         "scripts/content_script.js"
       ]
     }
