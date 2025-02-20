@@ -1,24 +1,26 @@
 {
   "manifest_version": 2,
   "name": "Extension",
-  "version": "0.2",
-  "description": "Testing out extensions.",
+  "version": "0.3",
+  "description": "Automagically fill out a form using an LLM.",
   "icons": {
-    "48": "assets/logo_48.png",
-    "96": "assets/logo_96.png"
+    "48": "assets/logos/logo_48.png",
+    "96": "assets/logos/logo_96.png"
   },
   "permissions": [
     "activeTab",
     "https://openrouter.ai/api/v1/*"
   ],
   "browser_action": {
-    "default_icon": "assets/logo_96.png",
+    "default_icon": "assets/logos/logo_96.png",
     "default_title": "Some Testing",
     "default_popup": "popup/popup.html"
   },
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
+      "matches": [
+        "<all_urls>"
+      ],
       "js": [
         "scripts/dom_tools.js",
         "scripts/llm_tools.js",
