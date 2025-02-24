@@ -10,18 +10,20 @@ const defaultModel = 'google/gemini-2.0-flash-001';
 
 const systemPrompt = {
     'role': 'system',
-    'content': 'You are an assistant who has to help people fill out web forms. ' +
-        'You will receive some JSON text with the following information: ' +
-        ' - a list of webpage elements (such as form input fields or text data)  ' +
-        ' with their tag name, text value, and path in the DOM. ' +
-        ' - a (potentially large) block of text that may contain information to fill out the form ' +
-        'Please return a valid JSON array with the following information: ' +
-        ' - the "path" of the element ' +
-        ' - the suggested "value" for the element ' +
-        ' - a "label" for the element ' +
+    'content': 'You are an assistant who has to help people fill out web forms.\n ' +
+        'You will receive some JSON text with the following information:\n ' +
+        ' - a list of relevant webpage elements (such as form input fields, divs, or text data)  ' +
+        ' with their tag name, text value, and path in the DOM.\n ' +
+        ' - a (potentially large) block of text that may contain information to fill out the form\n ' +
+        'Please return a valid JSON array with the following information:\n ' +
+        ' - the "path" of the element\n ' +
+        ' - the suggested "value" for the element\n ' +
+        ' - a "label" for the element\n ' +
+        'Fill out as many as you can, superfluous entries will be filtered out later.\n ' +
         'If you want to add additional information you may add a "remark" field to pass it on, ' +
-        'but always ensure the result is a valid JSON array. ' +
-        'Make sure the result is valid JSON, and make sure to escaping any quotes in the text.'
+        'but always ensure the result is a valid JSON array.\n ' +
+        'Make sure the result is valid JSON, and make sure to escape any quotes in the text.\n ' +
+        'Please try to break down long values in paragraphs separated with a newline character.\n'
 };
 
 async function callOpenRouter(messages, apiKey, modelStr = defaultModel) {
