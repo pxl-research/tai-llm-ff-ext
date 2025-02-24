@@ -98,7 +98,7 @@
             if (element) { // fake user input
                 const tagName = element.tagName.toLowerCase();
 
-                console.log(`Setting ${result.path} of type ${tagName}`);
+                console.log(`Putting suggestion for '${result.label}' in ${result.path}`);
                 element.focus(); // focus on element
 
                 if (tagName === 'input' || tagName === 'textarea') {
@@ -111,11 +111,10 @@
 
                     // some custom code for ql-editor >_<
                     const classes = element.getAttribute('class');
-                    if (classes && classes.contains('ql-editor')) {
-                        console.log('ql-editor');
-                        // TODO: select the <p> tag below this
-                        // "type" in the value
-                        document.execCommand('insertText', false, result.value);
+                    if (classes && classes.includes('ql-editor')) {
+                        // select the <p> tag below this
+                        const pTag = element.firstElementChild;
+                        pTag.innerHTML = result.value;
                     }
 
                 } else if (element.hasAttribute('value') /* || tagName === 'select' */) {
