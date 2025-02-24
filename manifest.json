@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "Extension",
+  "name": "LLM Form Filler Extension",
   "version": "0.3",
   "description": "Automagically fill out a form using an LLM.",
   "icons": {
@@ -13,7 +13,7 @@
   ],
   "browser_action": {
     "default_icon": "assets/logos/logo_96.png",
-    "default_title": "Some Testing",
+    "default_title": "LLM Form Filler",
     "default_popup": "popup/popup.html"
   },
   "content_scripts": [
