@@ -92,7 +92,7 @@ function c2cb(text) {
 
 // register a listener for communication with the script in the tab
 browser.runtime.onMessage.addListener((message, sender) => {
-    console.log(`browser.runtime.onMessage from ${message.target}`);
+    // console.log(`browser.runtime.onMessage from ${message.from}`);
 
     const progressBar = document.getElementById('progress_bar');
     switch (message.state) {
