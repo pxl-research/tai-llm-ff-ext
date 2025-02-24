@@ -1,5 +1,5 @@
 // convert partial DOM to flat JSON list
-function domToJson(node, tagFilter, outputList) {
+function domToJson(node, tagFilter, classFilter, outputList) {
     const tagName = node.tagName.toLowerCase();
     const jsonObj = {
         tag: tagName
@@ -12,7 +12,7 @@ function domToJson(node, tagFilter, outputList) {
         for (let i = 0; i < node.childNodes.length; i++) {
             const child = node.childNodes[i];
             if (child.nodeType === 1) { // process tag nodes
-                domToJson(child, tagFilter, outputList);
+                domToJson(child, tagFilter, classFilter, outputList);
             } else if (child.nodeType === 3) { // process text nodes
                 const text = child.textContent.trim();
                 if (text.length > 0) {
@@ -25,8 +25,12 @@ function domToJson(node, tagFilter, outputList) {
         }
     }
 
-    // we want text nodes and nodes from the filter
-    if (jsonObj.text || tagFilter.includes(tagName)) {
+    const cssClass = node.getAttribute('class');
+
+    // we want text nodes and nodes from the filters
+    if (jsonObj.text
+        || tagFilter.includes(tagName)
+        || (cssClass && classFilter.some(el => cssClass.includes(el)))) {
         if (node.hasAttribute('type')
             && node.getAttribute('type') === 'hidden') {
             return; // skip this one
