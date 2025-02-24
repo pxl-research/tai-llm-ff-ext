@@ -1,22 +1,27 @@
-html,
 body {
-    width: 600px;
-    height: 600px;
+    width: 720px;
+    min-height: 720px;
+}
+
+div {
+    margin-bottom: 20px;
 }
 
 button {
-    margin: 10px;
-    min-width: 150px;
+    margin-right: 20px;
+    min-width: 160px;
 }
 
 progress {
     margin: 10px;
     min-width: 300px;
     width: 100%;
+    accent-color: #ae9a64;
 }
 
 textarea {
-    min-height: 150px;
+    min-height: 160px;
+    width: 97%;
 }
 
 .hidden {
@@ -25,5 +30,6 @@ textarea {
 
 #popup-content {
     margin: auto;
-    padding: 20px;
+    padding: 10px;
+    width: 700px;
 }

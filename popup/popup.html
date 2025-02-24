@@ -8,41 +8,59 @@
     <!-- Milligram CSS -->
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/milligram/1.4.1/milligram.css">
+    <link rel="stylesheet" href="../assets/css/milligram_1.4.1.css">
 
     <link rel="stylesheet" href="popup.css"/>
 </head>
 
 <body>
 <div id="popup-content">
-    <div style="margin-bottom: 25px;">
+    <div id="header">
         <h2>
             <img src="../assets/logos/logo.png" alt="logo"
-                 style="height: 60px; vertical-align: middle;"/>
+                 style="height: 50px; vertical-align: middle;"/>
             Pixie Lite Plug-in
         </h2>
     </div>
 
-    <div>
+    <div id="input">
+        <h3>
+            Input
+            <button id="reset_form" type="reset" class="button button-outline float-right">
+                Clear form
+            </button>
+        </h3>
+
         <label for="user_data">Enter the contents of your documents here:</label>
         <textarea id="user_data" rows="5" cols="50" placeholder="Contextual information ..."></textarea>
+
+        <div>
+            <button id="fill_out_form" class="button">
+                Fill out form
+            </button>
+        </div>
+
+        <div id="progress_bar" style="width:97%; display: none">
+            <progress id="progress"></progress>
+            <p><small><span id="debug_msg"></span></small></p>
+        </div>
     </div>
 
-    <div id="buttons">
-        <button id="fill_out_form" class="button">
-            Fill out form
-        </button>
-        <button id="reset_form" type="reset" class="button button-outline" style="display: none">
-            Reset
-        </button>
+    <div id="output">
+        <h3>
+            Output
+            <button id="reset_output" type="reset" class="button button-outline float-right">
+                Clear output
+            </button>
+        </h3>
+
+
+        <dl id="output_list">
+        </dl>
     </div>
 
-    <div id="progress_bar" style="display: none">
-        <progress id="progress"></progress>
-        <p><small><span id="debug_msg"></span></small></p>
-    </div>
-
-    <div style="margin-top: 50px;">
+    <div id="settings">
+        <h3>Settings</h3>
         <label for="or_key">Enter OpenRouter key:</label>
         <input type="password" id="or_key" placeholder="sk-or-v1-f3a...907"/>
         <button id="save_or_key" class="button">

@@ -19,6 +19,7 @@
         return str.substring(2);
     }
 
+    // TODO: detect if there is a form present and give a pop-up
 
     function fillOutForm(msg) {
 
@@ -87,6 +88,7 @@
     function processLlmResult(resultArray) {
         document.activeElement.blur(); // remove focus
         for (const result of resultArray) {
+            postMessage(JSON.stringify(result), ST_DEFAULT);
             if (!result.path) {
                 console.warn(`No path included in result!`);
                 continue;
@@ -96,33 +98,30 @@
             if (element) { // fake user input
                 const tagName = element.tagName.toLowerCase();
 
-                console.log(`Setting ${result.path} of type ${tagName} to ${result.value}`);
+                console.log(`Putting suggestion for '${result.label}' in ${result.path}`);
                 element.focus(); // focus on element
-
 
                 if (tagName === 'input' || tagName === 'textarea') {
                     // "type" in the value
                     document.execCommand('insertText', false, result.value);
-                    console.info(`Typing the value in ${tagName}`);
+
                 } else if (tagName === 'span' || tagName === 'div') {
                     // "click" on the element
                     element.click();
-                    console.info(`Clicking on ${tagName}`);
 
                     // some custom code for ql-editor >_<
                     const classes = element.getAttribute('class');
-                    if (classes && classes.contains('ql-editor')) {
-                        console.log('ql-editor');
-                        // TODO: select the <p> tag below this
-                        // "type" in the value
-                        document.execCommand('insertText', false, result.value);
-                        console.info(`Typing the value in ${tagName}`);
+                    if (classes && classes.includes('ql-editor')) {
+                        // select the <p> tag below this
+                        const pTag = element.firstElementChild;
+                        pTag.innerHTML = result.value;
                     }
 
                 } else if (element.hasAttribute('value') /* || tagName === 'select' */) {
                     // set the value
                     element.value = result.value;
                     console.info(`Setting the value in ${tagName}`);
+
                 } else {
                     console.warn(`I don't know what to do with ${result.path} of type ${tagName}`);
                 }

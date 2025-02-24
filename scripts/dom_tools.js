@@ -26,22 +26,28 @@ function domToJson(node, tagFilter, classFilter, outputList) {
     }
 
     const cssClass = node.getAttribute('class');
+    const matchingClass = (cssClass && classFilter.some(el => cssClass.includes(el)));
 
     // we want text nodes and nodes from the filters
     if (jsonObj.text
         || tagFilter.includes(tagName)
-        || (cssClass && classFilter.some(el => cssClass.includes(el)))) {
+        || matchingClass) {
         if (node.hasAttribute('type')
             && node.getAttribute('type') === 'hidden') {
             return; // skip this one
         }
 
         const nodePath = getDomPath(node);
+        jsonObj.path = nodePath;
 
         // store the node path in the DOM for later
         node.setAttribute('path', nodePath);
 
-        jsonObj.path = nodePath;
+        if (matchingClass) {
+            // pass the class as extra info
+            jsonObj.className = cssClass;
+        }
+
         outputList.push(jsonObj);
     }
 }
