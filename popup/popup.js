@@ -1,6 +1,6 @@
 const LS_OR_KEY = 'or_key';
 const LS_USER_DATA = 'user_data';
-const LS_OUTPUT = 'output';
+const LS_OUTPUT = 'output_list';
 
 function listenForClicks() {
     const CLICK = 'click';
@@ -31,12 +31,18 @@ function listenForClicks() {
                 // store user data in local storage, for convenience
                 localStorage.setItem(LS_USER_DATA, txUserData.value.trim());
 
-                const outputList = document.getElementById('output');
+                const outputList = document.getElementById(LS_OUTPUT);
                 outputList.innerHTML = ''; // clear response
 
             } else if (e.target.id === 'save_or_key') {
                 // store the key in local storage TODO: encrypt
                 localStorage.setItem(LS_OR_KEY, txOrKey.value.trim());
+            } else if (e.target.id === 'reset_form') {
+                txUserData.value = '';
+                localStorage.setItem(LS_USER_DATA, '');
+            } else if (e.target.id === 'reset_output') {
+                divOutput.innerHTML = '';
+                localStorage.setItem(LS_OUTPUT, '');
             }
         }
 
@@ -72,7 +78,7 @@ function processMessage(message, state) {
 
         if (msgObj.hasOwnProperty('label')) {
             // display the message as an input suggestion
-            const outputList = document.getElementById('output');
+            const outputList = document.getElementById('output_list');
             outputList.innerHTML += `<dt>${msgObj.label}</dt>\n`;
             outputList.innerHTML += `<dd>${msgObj.value}</dd>\n`;
 
