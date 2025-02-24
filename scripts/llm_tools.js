@@ -18,6 +18,7 @@ const systemPrompt = {
         'Please return a valid JSON array with the following information: ' +
         ' - the "path" of the element ' +
         ' - the suggested "value" for the element ' +
+        ' - a "label" for the element ' +
         'If you want to add additional information you may add a "remark" field to pass it on, ' +
         'but always ensure the result is a valid JSON array. ' +
         'Make sure the result is valid JSON, and make sure to escaping any quotes in the text.'
