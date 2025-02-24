@@ -20,7 +20,7 @@ const systemPrompt = {
         ' - the suggested "value" for the element ' +
         'If you want to add additional information you may add a "remark" field to pass it on, ' +
         'but always ensure the result is a valid JSON array. ' +
-        'Make absolutely sure you DO NOT include any markup such as ```, ```json or any other markup. '
+        'Make sure the result is valid JSON, and make sure to escaping any quotes in the text.'
 };
 
 async function callOpenRouter(messages, apiKey, modelStr = defaultModel) {

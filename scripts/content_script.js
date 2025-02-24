@@ -25,8 +25,9 @@
         // convert part of the DOM to a flat JSON array
         const startTag = document.getElementsByTagName('body')[0];
         const tagFilter = ['input', 'textarea', 'select', 'option'];
+        const classFilter = ['ql-editor'];
         const outputList = [];
-        domToJson(startTag, tagFilter, outputList);
+        domToJson(startTag, tagFilter, classFilter, outputList);
 
         // const jsonString = JSON.stringify(outputList, null, 1);
         // console.log(jsonString);
@@ -49,6 +50,8 @@
         callOpenRouter(messages, msg.apiKey)
             .then((llmResult) => {
                 postMessage(`LLM answer received.`, ST_RUNNING);
+                let suggestedValues = [];
+
                 if (llmResult.hasOwnProperty('choices')) {
                     if (llmResult.choices.length > 0) {
                         if (llmResult.choices[0].hasOwnProperty('message')) {
@@ -56,27 +59,33 @@
 
                             if (message.hasOwnProperty('content')) {
                                 console.log(message.content);
+                                try {
+                                    let rawContent = message.content;
+                                    // TODO error checking on response format
+                                    if (rawContent.startsWith('```json')) {
+                                        rawContent = rawContent.substring(8, rawContent.length);
+                                    }
+                                    if (rawContent.endsWith('```')) {
+                                        rawContent = rawContent.substring(0, rawContent.length - 3);
+                                    }
 
-                                let rawContent = message.content;
-                                // TODO error checking on response format
-                                if (rawContent.startsWith('```json')) {
-                                    rawContent = rawContent.substring(8, rawContent.length);
+                                    suggestedValues = JSON.parse(rawContent);
+                                } catch (error) {
+                                    console.warn(`Could not parse LLM result: ${error}`);
                                 }
-                                if (rawContent.endsWith('```')) {
-                                    rawContent = rawContent.substring(0, rawContent.length - 3);
-                                }
-
-                                const suggestedValues = JSON.parse(rawContent);
-                                processLlmResult(suggestedValues);
                             }
                         }
                     }
                 }
+
+                processLlmResult(suggestedValues);
+                postMessage('Finished processing', ST_DONE);
             });
     }
 
     // process the LLM response
     function processLlmResult(resultArray) {
+        document.activeElement.blur(); // remove focus
         for (const result of resultArray) {
             if (!result.path) {
                 console.warn(`No path included in result!`);
@@ -85,21 +94,37 @@
 
             const element = document.querySelector(`[path="${result.path}"]`);
             if (element) { // fake user input
-                console.log(`Setting ${result.path} of type ${element.tagName.toLowerCase()} to ${result.value}`);
+                const tagName = element.tagName.toLowerCase();
+
+                console.log(`Setting ${result.path} of type ${tagName} to ${result.value}`);
                 element.focus(); // focus on element
 
-                if (element.tagName.toLowerCase() === 'input' || element.tagName.toLowerCase() === 'textarea') {
+
+                if (tagName === 'input' || tagName === 'textarea') {
                     // "type" in the value
                     document.execCommand('insertText', false, result.value);
-                } else if (element.tagName.toLowerCase() === 'select') {
-                    // set the value
-                    element.value = result.value;
-                } else if (element.tagName.toLowerCase() === 'span' || element.tagName.toLowerCase() === 'div') {
+                    console.info(`Typing the value in ${tagName}`);
+                } else if (tagName === 'span' || tagName === 'div') {
                     // "click" on the element
                     element.click();
+                    console.info(`Clicking on ${tagName}`);
+
+                    // some custom code for ql-editor >_<
+                    const classes = element.getAttribute('class');
+                    if (classes && classes.contains('ql-editor')) {
+                        console.log('ql-editor');
+                        // TODO: select the <p> tag below this
+                        // "type" in the value
+                        document.execCommand('insertText', false, result.value);
+                        console.info(`Typing the value in ${tagName}`);
+                    }
+
+                } else if (element.hasAttribute('value') /* || tagName === 'select' */) {
+                    // set the value
                     element.value = result.value;
+                    console.info(`Setting the value in ${tagName}`);
                 } else {
-                    console.warn(`Setting ${result.path} to ${result.value} failed`);
+                    console.warn(`I don't know what to do with ${result.path} of type ${tagName}`);
                 }
 
                 element.blur(); // unfocus the element
@@ -107,22 +132,29 @@
                 console.warn(`Could not find element with path ${result.path}`);
             }
         }
-        postMessage('Finished processing', ST_DONE);
     }
 
     // send messages through the browser runtime
     function postMessage(msg = '', state = ST_DEFAULT) {
-        browser.runtime.sendMessage({
-            'from': 'content_script',
-            'message': msg,
-            'state': state
-        });
+        try {
+            browser.runtime.sendMessage({
+                'from': 'content_script',
+                'message': msg,
+                'state': state
+            });
+        } catch (error) {
+            console.warn(`Could not send message: ${error}`);
+        }
     }
 
     // listen for messages from the background script.
-    browser.runtime.onMessage.addListener((message) => {
-        postMessage('Started processing', ST_RUNNING);
-        // call the function to process form elements
-        fillOutForm(message);
-    });
+    try {
+        browser.runtime.onMessage.addListener((message) => {
+            postMessage('Started processing', ST_RUNNING);
+            // call the function to process form elements
+            fillOutForm(message);
+        });
+    } catch (error) {
+        console.warn(`Could not register listener: ${error}`);
+    }
 })();
