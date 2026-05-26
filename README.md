@@ -24,7 +24,7 @@ For a deeper dive into the internals, see [CLAUDE.md](CLAUDE.md).
 - **Vanilla JavaScript** — no framework, no build step or bundler.
 - **WebExtensions API (Manifest V2)** — targets Mozilla Firefox.
 - **[OpenRouter](https://openrouter.ai/) API** — LLM gateway; default model
-  `deepseek/deepseek-v4-flash`.
+  `google/gemini-2.5-flash`.
 - **[Vitest](https://vitest.dev/) + [jsdom](https://github.com/jsdom/jsdom)** —
   unit tests for the pure helpers.
 - Bundled locally (no third-party requests): the
