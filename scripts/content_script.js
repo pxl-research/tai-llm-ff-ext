@@ -97,17 +97,14 @@
         }
     }
 
-    // send messages through the browser runtime
+    // send a message to the popup; the popup may be closed (Firefox closes it
+    // on blur), leaving no receiver — that rejection is expected, so ignore it
     function postMessage(msg = '', state = ST_DEFAULT) {
-        try {
-            browser.runtime.sendMessage({
-                'from': 'content_script',
-                'message': msg,
-                'state': state
-            });
-        } catch (error) {
-            console.warn(`Could not send message: ${error}`);
-        }
+        browser.runtime.sendMessage({
+            'from': 'content_script',
+            'message': msg,
+            'state': state
+        }).catch(() => {});
     }
 
     // listen for messages from the popup
