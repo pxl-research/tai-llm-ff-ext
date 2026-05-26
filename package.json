@@ -1,0 +1,14 @@
+{
+  "name": "ff-llm-ext",
+  "version": "0.3.0",
+  "description": "Firefox extension that autofills web forms using an LLM via OpenRouter.",
+  "private": true,
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "vitest": "^4.1.7"
+  }
+}

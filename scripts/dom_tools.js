@@ -7,8 +7,6 @@ function domToJson(node, tagFilter, classFilter, outputList) {
 
 
     if (node.childNodes.length > 0 && tagName !== 'script') {
-        // jsonObj.count = node.childNodes.length;
-        const children = [];
         for (let i = 0; i < node.childNodes.length; i++) {
             const child = node.childNodes[i];
             if (child.nodeType === 1) { // process tag nodes
@@ -19,9 +17,6 @@ function domToJson(node, tagFilter, classFilter, outputList) {
                     jsonObj.text = text;
                 }
             }
-        }
-        if (children.length > 0) {
-            jsonObj.children = children;
         }
     }
 
@@ -95,4 +90,8 @@ function getChildIndex(child) {
 
     // there is no parent, or the child could not be found
     return -1;
+}
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = {domToJson, getDomPath, getChildIndex};
 }

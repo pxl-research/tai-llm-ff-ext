@@ -27,8 +27,10 @@ const systemPrompt = {
 };
 
 async function callOpenRouter(messages, apiKey, modelStr = defaultModel) {
-    const headers = defaultHeaders;
-    headers['Authorization'] = `Bearer ${apiKey}`;
+    const headers = {
+        ...defaultHeaders,
+        'Authorization': `Bearer ${apiKey}`
+    };
 
     const body = {
         'model': modelStr,
