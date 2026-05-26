@@ -6,7 +6,7 @@ const defaultHeaders = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*'
 };
-const defaultModel = 'google/gemini-2.0-flash-001';
+const defaultModel = 'deepseek/deepseek-v4-flash';
 
 const systemPrompt = {
     'role': 'system',
