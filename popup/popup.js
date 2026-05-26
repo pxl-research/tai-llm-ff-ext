@@ -1,117 +1,146 @@
 const LS_OR_KEY = 'or_key';
 const LS_USER_DATA = 'user_data';
-const LS_OUTPUT = 'output_list';
+const LS_OUTPUT = 'output_list'; // also the DOM id of the output <dl>
+
+// message states (mirror scripts/content_script.js)
+const ST_RUNNING = 1;
+const ST_DONE = 2;
+const ST_PROBLEM = -1;
+
+// in-memory mirror of the persisted output suggestions
+let suggestions = [];
 
 function listenForClicks() {
-    const CLICK = 'click';
-
     const txOrKey = document.getElementById(LS_OR_KEY);
     const txUserData = document.getElementById(LS_USER_DATA);
     const divOutput = document.getElementById(LS_OUTPUT);
 
-    txOrKey.value = localStorage.getItem(LS_OR_KEY);
-    txUserData.value = localStorage.getItem(LS_USER_DATA);
-    divOutput.innerHTML = localStorage.getItem(LS_OUTPUT);
+    txOrKey.value = localStorage.getItem(LS_OR_KEY) ?? '';
+    txUserData.value = localStorage.getItem(LS_USER_DATA) ?? '';
 
-    document.addEventListener(CLICK, (e) => {
+    suggestions = loadSuggestions();
+    renderSuggestions(divOutput);
 
-        // send a message to the content script in the active tab.
-        function performAction(tabs) {
-            if (e.target.id === 'fill_out_form') {
-                // get user entered data and pass to content script
-                browser.tabs.sendMessage(tabs[0].id,
-                    {
-                        command: CLICK,
-                        target: e.target.id,
-                        label: e.target.textContent.trim(),
+    const buttonHandlers = {
+        fill_out_form: (target) => {
+            browser.tabs
+                .query({active: true, currentWindow: true})
+                .then((tabs) => {
+                    browser.tabs.sendMessage(tabs[0].id, {
+                        command: 'click',
+                        target: target.id,
+                        label: target.textContent.trim(),
                         userData: txUserData.value.trim(),
                         apiKey: txOrKey.value.trim()
                     });
+                })
+                .catch((error) => console.error(`Error: ${error}`));
 
-                // store user data in local storage, for convenience
-                localStorage.setItem(LS_USER_DATA, txUserData.value.trim());
-
-                const outputList = document.getElementById(LS_OUTPUT);
-                outputList.innerHTML = ''; // clear response
-
-            } else if (e.target.id === 'save_or_key') {
-                // store the key in local storage TODO: encrypt
-                localStorage.setItem(LS_OR_KEY, txOrKey.value.trim());
-            } else if (e.target.id === 'reset_form') {
-                txUserData.value = '';
-                localStorage.setItem(LS_USER_DATA, '');
-            } else if (e.target.id === 'reset_output') {
-                divOutput.innerHTML = '';
-                localStorage.setItem(LS_OUTPUT, '');
-            }
+            localStorage.setItem(LS_USER_DATA, txUserData.value.trim());
+            clearSuggestions(divOutput);
+            setError('');
+        },
+        save_or_key: () => {
+            // TODO: encrypt
+            localStorage.setItem(LS_OR_KEY, txOrKey.value.trim());
+        },
+        reset_form: () => {
+            txUserData.value = '';
+            localStorage.setItem(LS_USER_DATA, '');
+        },
+        reset_output: () => {
+            clearSuggestions(divOutput);
         }
+    };
 
-        function reportError(error) {
-            console.error(`Error: ${error}`);
+    document.addEventListener('click', (e) => {
+        const target = e.target;
+        if (target.tagName !== 'BUTTON' || !target.closest('#popup-content')) {
+            return;
         }
-
-        // get the active tab, then call a method as appropriate.
-        if (e.target.tagName !== 'BUTTON' || !e.target.closest('#popup-content')) {
-            return; // ignore when click is not on a button within <div id='popup-content'>.
-        } else {
-            browser.tabs
-                .query({active: true, currentWindow: true})
-                .then(performAction)
-                .catch(reportError);
+        const handler = buttonHandlers[target.id];
+        if (handler) {
+            handler(target);
         }
     });
 }
 
 // display the popup's error message and hide the normal UI
 function reportExecuteScriptError(error) {
-    document.querySelector('#popup-content')
-        .classList.add('hidden');
-    document.querySelector('#error-content')
-        .classList.remove('hidden');
+    document.querySelector('#popup-content').classList.add('hidden');
+    document.querySelector('#error-content').classList.remove('hidden');
     console.error(`Failed to execute content script: ${error.message}`);
 }
 
+// show a transient error notice, or clear it when text is empty
+function setError(text) {
+    const el = document.getElementById('error_msg');
+    el.textContent = text;
+    el.classList.toggle('hidden', !text);
+}
 
-function processMessage(message, state) {
+// append an LLM-suggested {label, value} pair to the output list as plain text
+function appendSuggestion(outputList, label, value) {
+    const dt = document.createElement('dt');
+    dt.textContent = label;
+    const dd = document.createElement('dd');
+    dd.textContent = value;
+    outputList.appendChild(dt);
+    outputList.appendChild(dd);
+}
+
+// read persisted suggestions; ignore any legacy or non-array value
+function loadSuggestions() {
+    try {
+        const stored = JSON.parse(localStorage.getItem(LS_OUTPUT));
+        return Array.isArray(stored) ? stored : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function renderSuggestions(outputList) {
+    outputList.innerHTML = '';
+    suggestions.forEach((s) => appendSuggestion(outputList, s.label, s.value));
+}
+
+function clearSuggestions(outputList) {
+    suggestions = [];
+    localStorage.setItem(LS_OUTPUT, '');
+    outputList.innerHTML = '';
+}
+
+function processMessage(message) {
     try {
         const msgObj = JSON.parse(message);
-
         if (msgObj.hasOwnProperty('label')) {
-            // display the message as an input suggestion
-            const outputList = document.getElementById('output_list');
-            outputList.innerHTML += `<dt>${msgObj.label}</dt>\n`;
-            outputList.innerHTML += `<dd>${msgObj.value}</dd>\n`;
-
-            // store this to preserve state
-            localStorage.setItem(LS_OUTPUT, outputList.innerHTML.trim());
+            const suggestion = {label: msgObj.label, value: msgObj.value};
+            suggestions.push(suggestion);
+            localStorage.setItem(LS_OUTPUT, JSON.stringify(suggestions));
+            appendSuggestion(document.getElementById(LS_OUTPUT), suggestion.label, suggestion.value);
         }
     } catch (error) {
         console.warn(`Could not process content of message: ${error}`);
     }
 }
 
-// copy to clipboard
-function c2cb(text) {
-    navigator.clipboard.writeText(text);
-}
-
-
 // register a listener for communication with the script in the tab
-browser.runtime.onMessage.addListener((message, sender) => {
-    // console.log(`browser.runtime.onMessage from ${message.from}`);
-
+browser.runtime.onMessage.addListener((message) => {
     const progressBar = document.getElementById('progress_bar');
     switch (message.state) {
-        case 1: // running
+        case ST_RUNNING:
             progressBar.style.display = 'inline-block';
-            const debugMsg = document.getElementById('debug_msg');
-            debugMsg.innerText = message.message;
+            document.getElementById('debug_msg').innerText = message.message;
             break;
-        case 2: // done
+        case ST_DONE:
             progressBar.style.display = 'none';
             break;
-        default: // other state
-            processMessage(message.message, message.state);
+        case ST_PROBLEM:
+            progressBar.style.display = 'none';
+            setError(message.message);
+            break;
+        default:
+            processMessage(message.message);
             break;
     }
 });

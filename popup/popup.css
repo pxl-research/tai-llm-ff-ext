@@ -1,35 +1,358 @@
+/* ============================================================
+   Pixie Lite — "Codex" theme
+   Warm parchment, ink, gold leaf, a breath of the logo's slate.
+   Display: Fraunces (serif).  UI/body: Hanken Grotesk.
+   ============================================================ */
+
+@font-face {
+    font-family: 'Fraunces';
+    font-style: normal;
+    font-weight: 400 600;
+    font-display: swap;
+    src: url('../assets/fonts/fraunces-latin-var.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Hanken Grotesk';
+    font-style: normal;
+    font-weight: 400 600;
+    font-display: swap;
+    src: url('../assets/fonts/hanken-grotesk-latin-var.woff2') format('woff2');
+}
+
+:root {
+    --paper: #f3ecdd;
+    --paper-raised: #fbf7ee;
+    --ink: #211d16;
+    --ink-soft: #6a6253;
+    --gold: #ae9a64;
+    --gold-deep: #8a7642;
+    --slate: #5d7c8a;
+    --line: rgba(33, 29, 22, 0.12);
+    --line-strong: rgba(33, 29, 22, 0.22);
+    --shadow: 0 1px 2px rgba(33, 29, 22, 0.06), 0 8px 24px rgba(33, 29, 22, 0.08);
+    --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
+}
+
+* {
+    box-sizing: border-box;
+}
+
 body {
-    width: 720px;
-    min-height: 720px;
+    width: 700px;
+    min-height: 700px;
+    margin: 0;
+    font-family: 'Hanken Grotesk', sans-serif;
+    font-size: 14px;
+    line-height: 1.5;
+    color: var(--ink);
+    background-color: var(--paper);
+    background-image:
+        radial-gradient(120% 90% at 80% -10%, rgba(93, 124, 138, 0.18), transparent 55%),
+        radial-gradient(90% 70% at 0% 0%, rgba(174, 154, 100, 0.12), transparent 50%);
 }
 
-div {
-    margin-bottom: 20px;
+/* faint paper grain */
+body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.4;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.045'/%3E%3C/svg%3E");
 }
 
-button {
-    margin-right: 20px;
-    min-width: 160px;
+/* ---- shell ---- */
+#popup-content {
+    position: relative;
+    padding: 28px 32px 32px;
 }
 
-progress {
-    margin: 10px;
-    min-width: 300px;
+/* ---- header ---- */
+#header {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding-bottom: 20px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--line);
+    animation: rise 0.5s ease both;
+}
+
+#header .logo {
+    width: 52px;
+    height: 52px;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+}
+
+#header h1 {
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-variation-settings: 'opsz' 144;
+    font-weight: 600;
+    font-size: 30px;
+    letter-spacing: -0.01em;
+    line-height: 1;
+    color: var(--ink);
+}
+
+#header .tagline {
+    margin: 6px 0 0;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+}
+
+/* ---- panels ---- */
+.panel {
+    background: var(--paper-raised);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 18px;
+    box-shadow: var(--shadow);
+    animation: rise 0.5s ease both;
+}
+
+#input   { animation-delay: 0.06s; }
+#output  { animation-delay: 0.12s; }
+#settings { animation-delay: 0.18s; }
+
+.panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+}
+
+.panel-head h2 {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-family: 'Fraunces', serif;
+    font-variation-settings: 'opsz' 40;
+    font-weight: 500;
+    font-size: 18px;
+    color: var(--ink);
+}
+
+/* small rotated gold marker before each section title */
+.panel-head h2::before {
+    content: '';
+    width: 7px;
+    height: 7px;
+    background: var(--gold);
+    transform: rotate(45deg);
+    box-shadow: 0 0 0 3px rgba(174, 154, 100, 0.15);
+}
+
+/* ---- form fields ---- */
+label {
+    display: block;
+    margin-bottom: 8px;
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: var(--ink-soft);
+}
+
+textarea,
+input[type="password"] {
     width: 100%;
-    accent-color: #ae9a64;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--ink);
+    background: #fffdf8;
+    border: 1px solid var(--line-strong);
+    border-radius: 10px;
+    padding: 12px 14px;
+    transition: border-color 0.18s ease, box-shadow 0.18s ease;
 }
 
 textarea {
-    min-height: 160px;
-    width: 97%;
+    min-height: 150px;
+    resize: vertical;
+    margin-bottom: 16px;
 }
 
-.hidden {
+input[type="password"] {
+    font-family: var(--mono);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+}
+
+textarea::placeholder,
+input::placeholder {
+    color: rgba(106, 98, 83, 0.6);
+}
+
+textarea:focus,
+input[type="password"]:focus {
+    outline: none;
+    border-color: var(--gold);
+    box-shadow: 0 0 0 3px rgba(174, 154, 100, 0.22);
+}
+
+/* ---- buttons ---- */
+.btn {
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    padding: 10px 20px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: transform 0.12s ease, background 0.18s ease,
+                border-color 0.18s ease, color 0.18s ease;
+}
+
+.btn:active {
+    transform: translateY(1px);
+}
+
+.btn-primary {
+    background: var(--ink);
+    color: #f6efdc;
+    border-color: var(--ink);
+}
+
+.btn-primary:hover {
+    background: #322c20;
+    border-color: var(--gold);
+    color: #fff4d8;
+}
+
+.btn-ghost {
+    background: transparent;
+    color: var(--ink-soft);
+    border-color: var(--line-strong);
+    padding: 7px 14px;
+    font-size: 12px;
+}
+
+.btn-ghost:hover {
+    color: var(--gold-deep);
+    border-color: var(--gold);
+}
+
+/* ---- progress (shown by popup.js via inline display) ---- */
+#progress_bar {
     display: none;
+    width: 100%;
+    margin-top: 18px;
 }
 
-#popup-content {
-    margin: auto;
-    padding: 10px;
-    width: 700px;
+progress {
+    appearance: none;
+    -webkit-appearance: none;
+    display: block;
+    width: 100%;
+    height: 6px;
+    border: none;
+    border-radius: 99px;
+    background: var(--line);
+}
+
+progress::-moz-progress-bar { background: var(--gold); border-radius: 99px; }
+progress::-webkit-progress-bar { background: var(--line); border-radius: 99px; }
+progress::-webkit-progress-value { background: var(--gold); border-radius: 99px; }
+
+#debug_msg {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    font-style: italic;
+    color: var(--ink-soft);
+}
+
+/* ---- transient error notice (API/network failures) ---- */
+.error-banner {
+    margin-top: 16px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(150, 52, 38, 0.35);
+    background: rgba(150, 52, 38, 0.08);
+    color: #8f3322;
+    font-size: 13px;
+    font-weight: 500;
+}
+
+/* ---- output: an editorial glossary ---- */
+#output_list {
+    margin: 0;
+}
+
+#output_list:empty::after {
+    content: 'Suggestions will appear here.';
+    display: block;
+    font-style: italic;
+    color: rgba(106, 98, 83, 0.7);
+}
+
+#output_list dt {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--gold-deep);
+    margin-top: 16px;
+}
+
+#output_list dt:first-child {
+    margin-top: 0;
+}
+
+#output_list dd {
+    margin: 4px 0 0;
+    padding-left: 14px;
+    border-left: 2px solid var(--line-strong);
+    color: var(--ink);
+    white-space: pre-wrap;
+}
+
+/* ---- settings ---- */
+.key-row {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+}
+
+.key-row input[type="password"] {
+    flex: 1;
+}
+
+.key-row .btn {
+    white-space: nowrap;
+}
+
+/* ---- error state ---- */
+#error-content {
+    display: grid;
+    place-items: center;
+    min-height: 200px;
+    padding: 40px;
+    font-family: 'Fraunces', serif;
+    font-size: 18px;
+    color: var(--ink-soft);
+    text-align: center;
+}
+
+/* .hidden uses !important so it always beats id-level display rules */
+.hidden {
+    display: none !important;
+}
+
+@keyframes rise {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #header, .panel { animation: none; }
+    .btn { transition: none; }
 }

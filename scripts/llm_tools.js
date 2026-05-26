@@ -6,7 +6,7 @@ const defaultHeaders = {
     'Content-Type': 'application/json',
     'Access-Control-Allow-Origin': '*'
 };
-const defaultModel = 'google/gemini-2.0-flash-001';
+const defaultModel = 'deepseek/deepseek-v4-flash';
 
 const systemPrompt = {
     'role': 'system',
@@ -27,26 +27,25 @@ const systemPrompt = {
 };
 
 async function callOpenRouter(messages, apiKey, modelStr = defaultModel) {
-    const headers = defaultHeaders;
-    headers['Authorization'] = `Bearer ${apiKey}`;
+    const headers = {
+        ...defaultHeaders,
+        'Authorization': `Bearer ${apiKey}`
+    };
 
     const body = {
         'model': modelStr,
         'messages': messages
     };
 
-    try {
-        const response = await fetch(baseUrl, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(body)
-        });
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        }
+    const response = await fetch(baseUrl, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+    });
 
-        return await response.json();
-    } catch (error) {
-        console.error(error.message);
+    if (!response.ok) {
+        throw new Error(await describeError(response));
     }
+
+    return await response.json();
 }

@@ -2,72 +2,63 @@
 <html lang="en">
 
 <head>
-    <title>Plugin</title>
+    <title>Pixie Lite — LLM Form Filler</title>
     <meta charset="utf-8"/>
 
-    <!-- Milligram CSS -->
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,300italic,700,700italic">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.css">
-    <link rel="stylesheet" href="../assets/css/milligram_1.4.1.css">
-
+    <link rel="stylesheet" href="../assets/css/normalize.css"/>
     <link rel="stylesheet" href="popup.css"/>
 </head>
 
 <body>
-<div id="popup-content">
-    <div id="header">
-        <h2>
-            <img src="../assets/logos/logo.png" alt="logo"
-                 style="height: 50px; vertical-align: middle;"/>
-            Pixie Lite Plug-in
-        </h2>
-    </div>
+<main id="popup-content">
+    <header id="header">
+        <img class="logo" src="../assets/logos/logo.png" alt="Pixie Lite logo"/>
+        <div class="title-block">
+            <h1>Pixie Lite</h1>
+            <p class="tagline">LLM form filler</p>
+        </div>
+    </header>
 
-    <div id="input">
-        <h3>
-            Input
-            <button id="reset_form" type="reset" class="button button-outline float-right">
-                Clear form
-            </button>
-        </h3>
-
-        <label for="user_data">Enter the contents of your documents here:</label>
-        <textarea id="user_data" rows="5" cols="50" placeholder="Contextual information ..."></textarea>
-
-        <div>
-            <button id="fill_out_form" class="button">
-                Fill out form
-            </button>
+    <section id="input" class="panel">
+        <div class="panel-head">
+            <h2>Input</h2>
+            <button id="reset_form" type="button" class="btn btn-ghost">Clear form</button>
         </div>
 
-        <div id="progress_bar" style="width:97%; display: none">
+        <label for="user_data">Paste the contents of your documents here</label>
+        <textarea id="user_data" rows="5" placeholder="Contextual information …"></textarea>
+
+        <button id="fill_out_form" type="button" class="btn btn-primary">Fill out form</button>
+
+        <div id="progress_bar">
             <progress id="progress"></progress>
-            <p><small><span id="debug_msg"></span></small></p>
+            <span id="debug_msg"></span>
         </div>
-    </div>
 
-    <div id="output">
-        <h3>
-            Output
-            <button id="reset_output" type="reset" class="button button-outline float-right">
-                Clear output
-            </button>
-        </h3>
+        <div id="error_msg" class="error-banner hidden" role="alert"></div>
+    </section>
 
+    <section id="output" class="panel">
+        <div class="panel-head">
+            <h2>Output</h2>
+            <button id="reset_output" type="button" class="btn btn-ghost">Clear output</button>
+        </div>
 
-        <dl id="output_list">
-        </dl>
-    </div>
+        <dl id="output_list"></dl>
+    </section>
 
-    <div id="settings">
-        <h3>Settings</h3>
-        <label for="or_key">Enter OpenRouter key:</label>
-        <input type="password" id="or_key" placeholder="sk-or-v1-f3a...907"/>
-        <button id="save_or_key" class="button">
-            Save key
-        </button>
-    </div>
-</div>
+    <section id="settings" class="panel">
+        <div class="panel-head">
+            <h2>Settings</h2>
+        </div>
+
+        <label for="or_key">OpenRouter API key</label>
+        <div class="key-row">
+            <input type="password" id="or_key" placeholder="sk-or-v1-f3a…907"/>
+            <button id="save_or_key" type="button" class="btn btn-primary">Save key</button>
+        </div>
+    </section>
+</main>
 
 <div id="error-content" class="hidden">
     <p>Cannot load plug-in.</p>

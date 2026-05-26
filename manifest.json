@@ -24,6 +24,7 @@
       "js": [
         "scripts/dom_tools.js",
         "scripts/llm_tools.js",
+        "scripts/llm_response.js",
         "scripts/content_script.js"
       ]
     }
