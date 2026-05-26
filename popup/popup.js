@@ -5,6 +5,7 @@ const LS_OUTPUT = 'output_list'; // also the DOM id of the output <dl>
 // message states (mirror scripts/content_script.js)
 const ST_RUNNING = 1;
 const ST_DONE = 2;
+const ST_PROBLEM = -1;
 
 function listenForClicks() {
     const txOrKey = document.getElementById(LS_OR_KEY);
@@ -32,6 +33,7 @@ function listenForClicks() {
 
             localStorage.setItem(LS_USER_DATA, txUserData.value.trim());
             divOutput.innerHTML = '';
+            setError('');
         },
         save_or_key: () => {
             // TODO: encrypt
@@ -64,6 +66,13 @@ function reportExecuteScriptError(error) {
     document.querySelector('#popup-content').classList.add('hidden');
     document.querySelector('#error-content').classList.remove('hidden');
     console.error(`Failed to execute content script: ${error.message}`);
+}
+
+// show a transient error notice, or clear it when text is empty
+function setError(text) {
+    const el = document.getElementById('error_msg');
+    el.textContent = text;
+    el.classList.toggle('hidden', !text);
 }
 
 // append an LLM-suggested {label, value} pair to the output list as plain text
@@ -99,6 +108,10 @@ browser.runtime.onMessage.addListener((message) => {
             break;
         case ST_DONE:
             progressBar.style.display = 'none';
+            break;
+        case ST_PROBLEM:
+            progressBar.style.display = 'none';
+            setError(message.message);
             break;
         default:
             processMessage(message.message);

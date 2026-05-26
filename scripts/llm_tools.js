@@ -37,18 +37,15 @@ async function callOpenRouter(messages, apiKey, modelStr = defaultModel) {
         'messages': messages
     };
 
-    try {
-        const response = await fetch(baseUrl, {
-            method: 'POST',
-            headers: headers,
-            body: JSON.stringify(body)
-        });
-        if (!response.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        }
+    const response = await fetch(baseUrl, {
+        method: 'POST',
+        headers: headers,
+        body: JSON.stringify(body)
+    });
 
-        return await response.json();
-    } catch (error) {
-        console.error(error.message);
+    if (!response.ok) {
+        throw new Error(await describeError(response));
     }
+
+    return await response.json();
 }

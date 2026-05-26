@@ -22,6 +22,20 @@ function parseLlmSuggestions(llmResult) {
     }
 }
 
+// build a readable message from a failed OpenRouter response (4xx/5xx)
+async function describeError(response) {
+    let detail = '';
+    try {
+        const body = await response.json();
+        detail = body?.error?.message || '';
+    } catch (error) {
+        // response body was not JSON
+    }
+    return detail
+        ? `LLM request failed (${response.status}): ${detail}`
+        : `LLM request failed (${response.status} ${response.statusText})`;
+}
+
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {stripJsonFence, parseLlmSuggestions};
+    module.exports = {stripJsonFence, parseLlmSuggestions, describeError};
 }

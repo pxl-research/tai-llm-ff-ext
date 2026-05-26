@@ -11,6 +11,7 @@
     const ST_DEFAULT = 0;
     const ST_RUNNING = 1;
     const ST_DONE = 2;
+    const ST_PROBLEM = -1;
 
     // TODO: detect if there is a form present and give a pop-up
 
@@ -41,6 +42,10 @@
                 postMessage(`LLM answer received.`, ST_RUNNING);
                 processLlmResult(parseLlmSuggestions(llmResult));
                 postMessage('Finished processing', ST_DONE);
+            })
+            .catch((error) => {
+                console.error(error);
+                postMessage(error.message, ST_PROBLEM);
             });
     }
 
