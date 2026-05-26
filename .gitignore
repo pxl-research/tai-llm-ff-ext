@@ -1,2 +1,4 @@
 .idea
 node_modules
+.claude/settings.local.json
+.DS_Store

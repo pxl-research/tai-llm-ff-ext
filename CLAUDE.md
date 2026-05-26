@@ -27,7 +27,7 @@ npm test         # run once
 npm run test:watch
 ```
 
-Tests live in `tests/` and cover `scripts/dom_tools.js` (`domToJson`, `getDomPath`, `getChildIndex`) and `scripts/llm_response.js` (`stripJsonFence`, `parseLlmSuggestions`).
+Tests live in `tests/` and cover `scripts/dom_tools.js` (`domToJson`, `getDomPath`, `getChildIndex`) and `scripts/llm_response.js` (`stripJsonFence`, `parseLlmSuggestions`, `describeError`).
 
 Those two source files end with a CommonJS export footer guarded by `typeof module !== 'undefined'` so they can be both loaded as classic browser scripts (where the footer is a no-op) and imported by Vitest. The browser-API-heavy code (`popup.js`, the `applySuggestion` DOM writes, `callOpenRouter`) is intentionally not unit-tested — verify those manually in Firefox.
 
@@ -39,7 +39,7 @@ Three execution contexts that communicate via `browser.runtime` messaging:
 
 2. **Content script** (`scripts/content_script.js` + `scripts/dom_tools.js` + `scripts/llm_tools.js` + `scripts/llm_response.js`) — declared in `manifest.json` to run on `<all_urls>` (loaded in that order; each file's top-level functions are globals the later files rely on). Guarded by `window.hasRun` to avoid double-execution since it is both declared in the manifest AND re-injected by the popup. Receives the `fill_out_form` message, scrapes the DOM, calls OpenRouter, and writes results back to the page. `llm_response.js` holds the response-parsing helpers (`stripJsonFence`, `parseLlmSuggestions`).
 
-3. **OpenRouter** (`scripts/llm_tools.js`) — `callOpenRouter()` POSTs to `https://openrouter.ai/api/v1/chat/completions`. The host is whitelisted in `manifest.json` permissions. Default model is `google/gemini-2.0-flash-001`. The system prompt lives in the `systemPrompt` constant in this same file.
+3. **OpenRouter** (`scripts/llm_tools.js`) — `callOpenRouter()` POSTs to `https://openrouter.ai/api/v1/chat/completions`. The host is whitelisted in `manifest.json` permissions. Default model is `deepseek/deepseek-v4-flash` (the only model used; there is no UI to change it). The system prompt lives in the `systemPrompt` constant in this same file. On a non-2xx/network failure it throws `describeError(response)` (from `llm_response.js`), which the content script forwards to the popup as a `-1` problem message.
 
 ### DOM addressing scheme
 
@@ -60,4 +60,4 @@ Messages between popup and content script use a `state` field: `0` default / pay
 
 ### LLM response parsing
 
-The model often wraps JSON in ```` ```json ... ``` ```` fences; `content_script.js` strips those before `JSON.parse`. If you change the system prompt, keep the contract that the response is a JSON array of `{path, value, label}` (optionally `remark`).
+The model often wraps JSON in ```` ```json ... ``` ```` fences; `parseLlmSuggestions()` in `llm_response.js` strips those (via `stripJsonFence`) before `JSON.parse`. If you change the system prompt, keep the contract that the response is a JSON array of `{path, value, label}` (optionally `remark`).
