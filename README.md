@@ -72,6 +72,9 @@ is shown in a banner instead of failing silently.
 
 ## Development
 
+Running the tests requires **Node.js 20.19+** (or 22.13+, or 24+), per the
+Vitest/jsdom toolchain.
+
 ```bash
 npm install        # first time only
 npm test           # run the unit tests once
@@ -98,3 +101,7 @@ Licensed under the **PolyForm Noncommercial License 1.0.0** — free for
 noncommercial use only. See [LICENSE](LICENSE).
 
 Required Notice: Copyright 2026 PXL Smart ICT
+
+Bundled third-party assets (normalize.css, and the Fraunces and Hanken Grotesk
+fonts) are under their own licenses — see
+[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

@@ -13,9 +13,13 @@ function parseLlmSuggestions(llmResult) {
     if (!rawContent) {
         return [];
     }
-    console.log(rawContent);
     try {
-        return JSON.parse(stripJsonFence(rawContent));
+        const parsed = JSON.parse(stripJsonFence(rawContent));
+        if (!Array.isArray(parsed)) {
+            console.warn('LLM result was not a JSON array');
+            return [];
+        }
+        return parsed;
     } catch (error) {
         console.warn(`Could not parse LLM result: ${error}`);
         return [];

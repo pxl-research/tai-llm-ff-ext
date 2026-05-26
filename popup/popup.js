@@ -7,6 +7,9 @@ const ST_RUNNING = 1;
 const ST_DONE = 2;
 const ST_PROBLEM = -1;
 
+// in-memory mirror of the persisted output suggestions
+let suggestions = [];
+
 function listenForClicks() {
     const txOrKey = document.getElementById(LS_OR_KEY);
     const txUserData = document.getElementById(LS_USER_DATA);
@@ -14,7 +17,9 @@ function listenForClicks() {
 
     txOrKey.value = localStorage.getItem(LS_OR_KEY) ?? '';
     txUserData.value = localStorage.getItem(LS_USER_DATA) ?? '';
-    divOutput.innerHTML = localStorage.getItem(LS_OUTPUT) ?? '';
+
+    suggestions = loadSuggestions();
+    renderSuggestions(divOutput);
 
     const buttonHandlers = {
         fill_out_form: (target) => {
@@ -32,7 +37,7 @@ function listenForClicks() {
                 .catch((error) => console.error(`Error: ${error}`));
 
             localStorage.setItem(LS_USER_DATA, txUserData.value.trim());
-            divOutput.innerHTML = '';
+            clearSuggestions(divOutput);
             setError('');
         },
         save_or_key: () => {
@@ -44,8 +49,7 @@ function listenForClicks() {
             localStorage.setItem(LS_USER_DATA, '');
         },
         reset_output: () => {
-            divOutput.innerHTML = '';
-            localStorage.setItem(LS_OUTPUT, '');
+            clearSuggestions(divOutput);
         }
     };
 
@@ -85,13 +89,35 @@ function appendSuggestion(outputList, label, value) {
     outputList.appendChild(dd);
 }
 
+// read persisted suggestions; ignore any legacy or non-array value
+function loadSuggestions() {
+    try {
+        const stored = JSON.parse(localStorage.getItem(LS_OUTPUT));
+        return Array.isArray(stored) ? stored : [];
+    } catch (error) {
+        return [];
+    }
+}
+
+function renderSuggestions(outputList) {
+    outputList.innerHTML = '';
+    suggestions.forEach((s) => appendSuggestion(outputList, s.label, s.value));
+}
+
+function clearSuggestions(outputList) {
+    suggestions = [];
+    localStorage.setItem(LS_OUTPUT, '');
+    outputList.innerHTML = '';
+}
+
 function processMessage(message) {
     try {
         const msgObj = JSON.parse(message);
         if (msgObj.hasOwnProperty('label')) {
-            const outputList = document.getElementById(LS_OUTPUT);
-            appendSuggestion(outputList, msgObj.label, msgObj.value);
-            localStorage.setItem(LS_OUTPUT, outputList.innerHTML.trim());
+            const suggestion = {label: msgObj.label, value: msgObj.value};
+            suggestions.push(suggestion);
+            localStorage.setItem(LS_OUTPUT, JSON.stringify(suggestions));
+            appendSuggestion(document.getElementById(LS_OUTPUT), suggestion.label, suggestion.value);
         }
     } catch (error) {
         console.warn(`Could not process content of message: ${error}`);

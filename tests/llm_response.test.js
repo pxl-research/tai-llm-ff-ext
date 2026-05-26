@@ -23,7 +23,6 @@ describe('stripJsonFence', () => {
 
 describe('parseLlmSuggestions', () => {
     beforeEach(() => {
-        vi.spyOn(console, 'log').mockImplementation(() => {});
         vi.spyOn(console, 'warn').mockImplementation(() => {});
     });
 
@@ -57,6 +56,14 @@ describe('parseLlmSuggestions', () => {
 
     it('returns [] on malformed JSON', () => {
         expect(parseLlmSuggestions(wrap('not json'))).toEqual([]);
+    });
+
+    it('returns [] when the parsed JSON is an object, not an array', () => {
+        expect(parseLlmSuggestions(wrap('{"path":"/a"}'))).toEqual([]);
+    });
+
+    it('returns [] when the parsed JSON is a primitive', () => {
+        expect(parseLlmSuggestions(wrap('42'))).toEqual([]);
     });
 });
 
