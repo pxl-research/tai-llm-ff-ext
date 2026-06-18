@@ -35,9 +35,10 @@ function listenForClicks() {
             clearSuggestions(divOutput);
             setError('');
         },
-        save_or_key: () => {
+        save_or_key: (target) => {
             // TODO: encrypt
             localStorage.setItem(LS_OR_KEY, txOrKey.value.trim());
+            flashSaved(target);
         },
         reset_form: () => {
             txUserData.value = '';
@@ -86,6 +87,17 @@ function setError(text) {
     const el = document.getElementById('error_msg');
     el.textContent = text;
     el.classList.toggle('hidden', !text);
+}
+
+// briefly flip a button's label to confirm an action; disable to prevent double-click
+function flashSaved(button, ms = 1500) {
+    const original = button.textContent;
+    button.textContent = 'Saved';
+    button.disabled = true;
+    setTimeout(() => {
+        button.textContent = original;
+        button.disabled = false;
+    }, ms);
 }
 
 // append an LLM-suggested {label, value} pair to the output list as plain text
