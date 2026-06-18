@@ -2,22 +2,25 @@ import {describe, it, expect, vi, beforeEach} from 'vitest';
 import {stripJsonFence, parseLlmSuggestions, describeError} from '../scripts/llm_response.js';
 
 describe('stripJsonFence', () => {
-    it('strips a ```json fence with a trailing newline', () => {
+    it('strips a ```json fence and trims surrounding whitespace', () => {
         const input = '```json\n[{"path":"/a"}]\n```';
-        expect(stripJsonFence(input)).toBe('[{"path":"/a"}]\n');
+        expect(stripJsonFence(input)).toBe('[{"path":"/a"}]');
     });
 
     it('strips a fence when the closing ``` has no leading newline', () => {
         expect(stripJsonFence('```json\n[]```')).toBe('[]');
     });
 
-    it('leaves unfenced content untouched', () => {
-        expect(stripJsonFence('[{"path":"/a"}]')).toBe('[{"path":"/a"}]');
+    it('strips a bare ``` fence (no language tag)', () => {
+        expect(stripJsonFence('```\n[]\n```')).toBe('[]');
     });
 
-    it('only strips a json fence, not a bare ``` fence at the start', () => {
-        const input = '```\n[]\n```';
-        expect(stripJsonFence(input)).toBe('```\n[]\n');
+    it('strips a fence with uppercase JSON tag', () => {
+        expect(stripJsonFence('```JSON\n[]\n```')).toBe('[]');
+    });
+
+    it('leaves unfenced content untouched (but trimmed)', () => {
+        expect(stripJsonFence('[{"path":"/a"}]')).toBe('[{"path":"/a"}]');
     });
 });
 

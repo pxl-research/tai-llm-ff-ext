@@ -1,27 +1,28 @@
 // PARSING OF THE LLM RESPONSE
 
-// strip a ```json ... ``` fence from a markdown-wrapped LLM response
+// strip a ```json ... ``` fence (or any fenced block) from a markdown-wrapped
+// LLM response; if no fence is present, return the text trimmed
 function stripJsonFence(text) {
-    return text
-        .replace(/^```json\s*/, '')
-        .replace(/```\s*$/, '');
+    const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
+    return (fenced ? fenced[1] : text).trim();
 }
 
 // extract the suggestions array from the OpenRouter response shape
 function parseLlmSuggestions(llmResult) {
     const rawContent = llmResult?.choices?.[0]?.message?.content;
     if (!rawContent) {
+        console.warn('LLM result had no content', llmResult);
         return [];
     }
     try {
         const parsed = JSON.parse(stripJsonFence(rawContent));
         if (!Array.isArray(parsed)) {
-            console.warn('LLM result was not a JSON array');
+            console.warn('LLM result was not a JSON array', rawContent);
             return [];
         }
         return parsed;
     } catch (error) {
-        console.warn(`Could not parse LLM result: ${error}`);
+        console.warn(`Could not parse LLM result: ${error}\nraw content was: ${rawContent}`);
         return [];
     }
 }
