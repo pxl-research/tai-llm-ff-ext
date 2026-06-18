@@ -27,7 +27,7 @@ npm test         # run once
 npm run test:watch
 ```
 
-Tests live in `tests/` and cover `scripts/dom_tools.js` (`domToJson`, `getDomPath`, `getChildIndex`) and `scripts/llm_response.js` (`stripJsonFence`, `parseLlmSuggestions`, `describeError`).
+Tests live in `tests/` and cover `scripts/dom_tools.js` (`domToJson`, `getDomPath`, `getChildIndex`) and `scripts/llm_response.js` (`stripJsonFence`, `parseLlmSuggestions`, `describeError`, `preview`). Run `npm run coverage` for a v8 coverage report under `coverage/` (output is `.gitignore`d).
 
 Those two source files end with a CommonJS export footer guarded by `typeof module !== 'undefined'` so they can be both loaded as classic browser scripts (where the footer is a no-op) and imported by Vitest. The browser-API-heavy code (`popup.js`, the `applySuggestion` DOM writes, `callOpenRouter`) is intentionally not unit-tested — verify those manually in Firefox.
 
