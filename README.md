@@ -76,9 +76,10 @@ Running the tests requires **Node.js 20.19+** (or 22.13+, or 24+), per the
 Vitest/jsdom toolchain.
 
 ```bash
-npm install        # first time only
-npm test           # run the unit tests once
-npm run test:watch # re-run on change
+npm install         # first time only
+npm test            # run the unit tests once
+npm run test:watch  # re-run on change
+npm run coverage    # generate a coverage report under coverage/
 ```
 
 The extension itself has no build step — edit a file, then reload the temporary
@@ -90,8 +91,10 @@ add-on from `about:debugging`.
   background information** are sent to OpenRouter (a third party).
 - Your API key, background text, and last output are stored **unencrypted** in
   the browser's `localStorage`.
-- The extension requests access to the active tab and all sites (`<all_urls>`)
-  so it can read and fill forms on the page you are viewing.
+- The extension uses the `activeTab` permission: it can read and fill the page
+  you are on **only after** you click its toolbar icon. No background access to
+  other sites. The only host it can reach without your interaction is
+  `https://openrouter.ai/api/v1/*` (for the LLM call itself).
 
 Use it only with data and on machines where that is acceptable.
 
