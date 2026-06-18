@@ -1,7 +1,7 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "LLM Form Filler Extension",
-  "version": "1.0",
+  "version": "2.0",
   "description": "Automagically fill out a form using an LLM.",
   "icons": {
     "48": "assets/logos/logo_48.png",
@@ -9,24 +9,19 @@
   },
   "permissions": [
     "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
     "https://openrouter.ai/api/v1/*"
   ],
-  "browser_action": {
+  "action": {
     "default_icon": "assets/logos/logo_96.png",
     "default_title": "LLM Form Filler",
     "default_popup": "popup/popup.html"
   },
-  "content_scripts": [
-    {
-      "matches": [
-        "<all_urls>"
-      ],
-      "js": [
-        "scripts/dom_tools.js",
-        "scripts/llm_tools.js",
-        "scripts/llm_response.js",
-        "scripts/content_script.js"
-      ]
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "pixie-lite@pxl-research.be"
     }
-  ]
+  }
 }

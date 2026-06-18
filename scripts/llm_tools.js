@@ -3,8 +3,7 @@ const baseUrl = 'https://openrouter.ai/api/v1/chat/completions';
 const defaultHeaders = {
     'HTTP-Referer': 'https://pxl-firefox-plugin.be/',
     'X-Title': 'Firefox LLM Plug-In @ PXL Smart ICT',
-    'Content-Type': 'application/json',
-    'Access-Control-Allow-Origin': '*'
+    'Content-Type': 'application/json'
 };
 const defaultModel = 'google/gemini-2.5-flash';
 

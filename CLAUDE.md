@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-A Firefox WebExtension (Manifest V2) that autofills web forms by sending the page's form structure plus user-supplied background information to an LLM via OpenRouter, then writing the model's suggestions back into the page.
+A Firefox WebExtension (Manifest V3) that autofills web forms by sending the page's form structure plus user-supplied background information to an LLM via OpenRouter, then writing the model's suggestions back into the page.
 
 ## Running / "Building"
 
@@ -35,11 +35,11 @@ Those two source files end with a CommonJS export footer guarded by `typeof modu
 
 Three execution contexts that communicate via `browser.runtime` messaging:
 
-1. **Popup** (`popup/popup.js`, `popup/popup.html`) — UI shown when the toolbar icon is clicked. Holds the OpenRouter API key and user "background information" in `localStorage` (keys `or_key`, `user_data`, `output_list`). On load it injects the content script via `browser.tabs.executeScript` and forwards button clicks to it.
+1. **Popup** (`popup/popup.js`, `popup/popup.html`) — UI shown when the toolbar icon is clicked. Holds the OpenRouter API key and user "background information" in `localStorage` (keys `or_key`, `user_data`, `output_list`). On each Fill click it injects the content script files into the active tab via `browser.scripting.executeScript` (using the `activeTab` permission), then drives the content script by calling `window.fillOutForm(...)` through a second `executeScript({func, args})` call. Using `func+args` rather than `tabs.sendMessage` sidesteps a Firefox MV3 timing race where the injection promise can resolve before any `runtime.onMessage` listener is observable.
 
-2. **Content script** (`scripts/content_script.js` + `scripts/dom_tools.js` + `scripts/llm_tools.js` + `scripts/llm_response.js`) — declared in `manifest.json` to run on `<all_urls>` (loaded in that order; each file's top-level functions are globals the later files rely on). Guarded by `window.hasRun` to avoid double-execution since it is both declared in the manifest AND re-injected by the popup. Receives the `fill_out_form` message, scrapes the DOM, calls OpenRouter, and writes results back to the page. `llm_response.js` holds the response-parsing helpers (`stripJsonFence`, `parseLlmSuggestions`).
+2. **Content script** (`scripts/content_script.js` + `scripts/dom_tools.js` + `scripts/llm_tools.js` + `scripts/llm_response.js`) — injected by the popup on Fill click (in that order; each file's top-level functions are globals the later files rely on). `content_script.js` exposes `window.fillOutForm` for the popup to invoke directly. The function scrapes the DOM, calls OpenRouter, and writes results back to the page. Progress and result messages flow back to the popup via `browser.runtime.sendMessage` (the content→popup direction is reliable). `llm_response.js` holds the response-parsing helpers (`stripJsonFence`, `parseLlmSuggestions`).
 
-3. **OpenRouter** (`scripts/llm_tools.js`) — `callOpenRouter()` POSTs to `https://openrouter.ai/api/v1/chat/completions`. The host is whitelisted in `manifest.json` permissions. Default model is `google/gemini-2.5-flash` (the only model used; there is no UI to change it). The system prompt lives in the `systemPrompt` constant in this same file. On a non-2xx/network failure it throws `describeError(response)` (from `llm_response.js`), which the content script forwards to the popup as a `-1` problem message.
+3. **OpenRouter** (`scripts/llm_tools.js`) — `callOpenRouter()` POSTs to `https://openrouter.ai/api/v1/chat/completions`. The host is whitelisted in `manifest.json` under `host_permissions`. Default model is `google/gemini-2.5-flash` (the only model used; there is no UI to change it). The system prompt lives in the `systemPrompt` constant in this same file. On a non-2xx/network failure it throws `describeError(response)` (from `llm_response.js`), which the content script forwards to the popup as a `-1` problem message.
 
 ### DOM addressing scheme
 

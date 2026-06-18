@@ -1,12 +1,5 @@
 (() => {
 
-    // prevent script from running twice
-    if (window.hasRun) {
-        return;
-    }
-    window.hasRun = true;
-
-
     // UI LOGIC
     const ST_DEFAULT = 0;
     const ST_RUNNING = 1;
@@ -16,6 +9,8 @@
     // TODO: detect if there is a form present and give a pop-up
 
     function fillOutForm(msg) {
+        postMessage('Started processing', ST_RUNNING);
+
         // convert part of the DOM to a flat JSON array
         const startTag = document.getElementsByTagName('body')[0];
         const tagFilter = ['input', 'textarea', 'select', 'option'];
@@ -57,6 +52,8 @@
 
         if (tagName === 'input' || tagName === 'textarea') {
             // "type" in the value so framework listeners fire
+            // TODO: execCommand is deprecated; switch to an InputEvent-based
+            // fallback if browsers eventually drop it
             document.execCommand('insertText', false, result.value);
 
         } else if (tagName === 'span' || tagName === 'div') {
@@ -107,13 +104,7 @@
         }).catch(() => {});
     }
 
-    // listen for messages from the popup
-    try {
-        browser.runtime.onMessage.addListener((message) => {
-            postMessage('Started processing', ST_RUNNING);
-            fillOutForm(message);
-        });
-    } catch (error) {
-        console.warn(`Could not register listener: ${error}`);
-    }
+    // expose to the popup so it can drive us via scripting.executeScript({func,args})
+    // — more reliable than runtime messaging right after injection
+    window.fillOutForm = fillOutForm;
 })();
