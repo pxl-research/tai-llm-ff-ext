@@ -22,7 +22,7 @@ For a deeper dive into the internals, see [CLAUDE.md](CLAUDE.md).
 ## Built with
 
 - **Vanilla JavaScript** — no framework, no build step or bundler.
-- **WebExtensions API (Manifest V2)** — targets Mozilla Firefox.
+- **WebExtensions API (Manifest V3)** — targets Mozilla Firefox.
 - **[OpenRouter](https://openrouter.ai/) API** — LLM gateway; default model
   `google/gemini-2.5-flash`.
 - **[Vitest](https://vitest.dev/) + [jsdom](https://github.com/jsdom/jsdom)** —

@@ -2,6 +2,13 @@ const LS_OR_KEY = 'or_key';
 const LS_USER_DATA = 'user_data';
 const LS_OUTPUT = 'output_list'; // also the DOM id of the output <dl>
 
+const CONTENT_SCRIPT_FILES = [
+    '/scripts/dom_tools.js',
+    '/scripts/llm_tools.js',
+    '/scripts/llm_response.js',
+    '/scripts/content_script.js'
+];
+
 // message states (mirror scripts/content_script.js)
 const ST_RUNNING = 1;
 const ST_DONE = 2;
@@ -22,27 +29,16 @@ function listenForClicks() {
     renderSuggestions(divOutput);
 
     const buttonHandlers = {
-        fill_out_form: (target) => {
-            browser.tabs
-                .query({active: true, currentWindow: true})
-                .then((tabs) => {
-                    browser.tabs.sendMessage(tabs[0].id, {
-                        command: 'click',
-                        target: target.id,
-                        label: target.textContent.trim(),
-                        userData: txUserData.value.trim(),
-                        apiKey: txOrKey.value.trim()
-                    });
-                })
-                .catch((error) => console.error(`Error: ${error}`));
-
+        fill_out_form: () => {
+            fillOutForm(txUserData.value.trim(), txOrKey.value.trim());
             localStorage.setItem(LS_USER_DATA, txUserData.value.trim());
             clearSuggestions(divOutput);
             setError('');
         },
-        save_or_key: () => {
+        save_or_key: (target) => {
             // TODO: encrypt
             localStorage.setItem(LS_OR_KEY, txOrKey.value.trim());
+            flashSaved(target);
         },
         reset_form: () => {
             txUserData.value = '';
@@ -65,11 +61,40 @@ function listenForClicks() {
     });
 }
 
-// display the popup's error message and hide the normal UI
-function reportExecuteScriptError(error) {
-    document.querySelector('#popup-content').classList.add('hidden');
-    document.querySelector('#error-content').classList.remove('hidden');
-    console.error(`Failed to execute content script: ${error.message}`);
+// inject the content script into the active tab (only if not already present)
+// and drive it directly via scripting.executeScript({func,args}); avoids the
+// timing race where tabs.sendMessage can fire before the content script's
+// onMessage listener is registered
+async function fillOutForm(userData, apiKey) {
+    try {
+        const [tab] = await browser.tabs.query({active: true, currentWindow: true});
+        if (!tab) {
+            setError('No active tab to run on.');
+            return;
+        }
+        await ensureContentScript(tab.id);
+        await browser.scripting.executeScript({
+            target: {tabId: tab.id},
+            func: (msg) => window.fillOutForm(msg),
+            args: [{userData, apiKey}]
+        });
+    } catch (error) {
+        setError(`Could not run on this page: ${error.message}`);
+    }
+}
+
+// inject the content script bundle only when it isn't already loaded in the tab
+async function ensureContentScript(tabId) {
+    const [{result}] = await browser.scripting.executeScript({
+        target: {tabId},
+        func: () => typeof window.fillOutForm === 'function'
+    });
+    if (!result) {
+        await browser.scripting.executeScript({
+            target: {tabId},
+            files: CONTENT_SCRIPT_FILES
+        });
+    }
 }
 
 // show a transient error notice, or clear it when text is empty
@@ -77,6 +102,17 @@ function setError(text) {
     const el = document.getElementById('error_msg');
     el.textContent = text;
     el.classList.toggle('hidden', !text);
+}
+
+// briefly flip a button's label to confirm an action; disable to prevent double-click
+function flashSaved(button, ms = 1500) {
+    const original = button.textContent;
+    button.textContent = 'Saved';
+    button.disabled = true;
+    setTimeout(() => {
+        button.textContent = original;
+        button.disabled = false;
+    }, ms);
 }
 
 // append an LLM-suggested {label, value} pair to the output list as plain text
@@ -145,8 +181,4 @@ browser.runtime.onMessage.addListener((message) => {
     }
 });
 
-// when the popup loads, inject the content script into the active tab
-browser.tabs
-    .executeScript({file: '/scripts/content_script.js'})
-    .then(listenForClicks)
-    .catch(reportExecuteScriptError);
+document.addEventListener('DOMContentLoaded', listenForClicks);

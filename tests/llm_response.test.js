@@ -1,23 +1,26 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest';
-import {stripJsonFence, parseLlmSuggestions, describeError} from '../scripts/llm_response.js';
+import {stripJsonFence, parseLlmSuggestions, describeError, preview} from '../scripts/llm_response.js';
 
 describe('stripJsonFence', () => {
-    it('strips a ```json fence with a trailing newline', () => {
+    it('strips a ```json fence and trims surrounding whitespace', () => {
         const input = '```json\n[{"path":"/a"}]\n```';
-        expect(stripJsonFence(input)).toBe('[{"path":"/a"}]\n');
+        expect(stripJsonFence(input)).toBe('[{"path":"/a"}]');
     });
 
     it('strips a fence when the closing ``` has no leading newline', () => {
         expect(stripJsonFence('```json\n[]```')).toBe('[]');
     });
 
-    it('leaves unfenced content untouched', () => {
-        expect(stripJsonFence('[{"path":"/a"}]')).toBe('[{"path":"/a"}]');
+    it('strips a bare ``` fence (no language tag)', () => {
+        expect(stripJsonFence('```\n[]\n```')).toBe('[]');
     });
 
-    it('only strips a json fence, not a bare ``` fence at the start', () => {
-        const input = '```\n[]\n```';
-        expect(stripJsonFence(input)).toBe('```\n[]\n');
+    it('strips a fence with uppercase JSON tag', () => {
+        expect(stripJsonFence('```JSON\n[]\n```')).toBe('[]');
+    });
+
+    it('leaves unfenced content untouched (but trimmed)', () => {
+        expect(stripJsonFence('[{"path":"/a"}]')).toBe('[{"path":"/a"}]');
     });
 });
 
@@ -64,6 +67,22 @@ describe('parseLlmSuggestions', () => {
 
     it('returns [] when the parsed JSON is a primitive', () => {
         expect(parseLlmSuggestions(wrap('42'))).toEqual([]);
+    });
+});
+
+describe('preview', () => {
+    it('returns text untouched when at or below the max', () => {
+        expect(preview('short text')).toBe('short text');
+        expect(preview('x'.repeat(200))).toBe('x'.repeat(200));
+    });
+
+    it('truncates text longer than the max and appends a length marker', () => {
+        const long = 'x'.repeat(250);
+        expect(preview(long)).toBe(`${'x'.repeat(200)}… (truncated, 250 chars total)`);
+    });
+
+    it('respects a custom max', () => {
+        expect(preview('hello world', 5)).toBe('hello… (truncated, 11 chars total)');
     });
 });
 
