@@ -61,17 +61,18 @@ function listenForClicks() {
     });
 }
 
-// inject the content script into the active tab and drive it directly via
-// scripting.executeScript({func,args}); avoids the timing race where
-// tabs.sendMessage can fire before the content script's onMessage listener
-// is registered
+// inject the content script into the active tab (only if not already present)
+// and drive it directly via scripting.executeScript({func,args}); avoids the
+// timing race where tabs.sendMessage can fire before the content script's
+// onMessage listener is registered
 async function fillOutForm(userData, apiKey) {
     try {
         const [tab] = await browser.tabs.query({active: true, currentWindow: true});
-        await browser.scripting.executeScript({
-            target: {tabId: tab.id},
-            files: CONTENT_SCRIPT_FILES
-        });
+        if (!tab) {
+            setError('No active tab to run on.');
+            return;
+        }
+        await ensureContentScript(tab.id);
         await browser.scripting.executeScript({
             target: {tabId: tab.id},
             func: (msg) => window.fillOutForm(msg),
@@ -79,6 +80,20 @@ async function fillOutForm(userData, apiKey) {
         });
     } catch (error) {
         setError(`Could not run on this page: ${error.message}`);
+    }
+}
+
+// inject the content script bundle only when it isn't already loaded in the tab
+async function ensureContentScript(tabId) {
+    const [{result}] = await browser.scripting.executeScript({
+        target: {tabId},
+        func: () => typeof window.fillOutForm === 'function'
+    });
+    if (!result) {
+        await browser.scripting.executeScript({
+            target: {tabId},
+            files: CONTENT_SCRIPT_FILES
+        });
     }
 }
 

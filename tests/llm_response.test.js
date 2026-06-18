@@ -1,5 +1,5 @@
 import {describe, it, expect, vi, beforeEach} from 'vitest';
-import {stripJsonFence, parseLlmSuggestions, describeError} from '../scripts/llm_response.js';
+import {stripJsonFence, parseLlmSuggestions, describeError, preview} from '../scripts/llm_response.js';
 
 describe('stripJsonFence', () => {
     it('strips a ```json fence and trims surrounding whitespace', () => {
@@ -67,6 +67,22 @@ describe('parseLlmSuggestions', () => {
 
     it('returns [] when the parsed JSON is a primitive', () => {
         expect(parseLlmSuggestions(wrap('42'))).toEqual([]);
+    });
+});
+
+describe('preview', () => {
+    it('returns text untouched when at or below the max', () => {
+        expect(preview('short text')).toBe('short text');
+        expect(preview('x'.repeat(200))).toBe('x'.repeat(200));
+    });
+
+    it('truncates text longer than the max and appends a length marker', () => {
+        const long = 'x'.repeat(250);
+        expect(preview(long)).toBe(`${'x'.repeat(200)}… (truncated, 250 chars total)`);
+    });
+
+    it('respects a custom max', () => {
+        expect(preview('hello world', 5)).toBe('hello… (truncated, 11 chars total)');
     });
 });
 

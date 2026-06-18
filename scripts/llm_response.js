@@ -7,22 +7,32 @@ function stripJsonFence(text) {
     return (fenced ? fenced[1] : text).trim();
 }
 
+// bound a string for logging: returns it untouched when short, otherwise a
+// truncated head + length marker (avoids leaking full LLM responses to the
+// console and keeps devtools responsive for very large payloads)
+function preview(text, max = 200) {
+    if (text.length <= max) {
+        return text;
+    }
+    return `${text.slice(0, max)}… (truncated, ${text.length} chars total)`;
+}
+
 // extract the suggestions array from the OpenRouter response shape
 function parseLlmSuggestions(llmResult) {
     const rawContent = llmResult?.choices?.[0]?.message?.content;
     if (!rawContent) {
-        console.warn('LLM result had no content', llmResult);
+        console.warn('LLM result had no content');
         return [];
     }
     try {
         const parsed = JSON.parse(stripJsonFence(rawContent));
         if (!Array.isArray(parsed)) {
-            console.warn('LLM result was not a JSON array', rawContent);
+            console.warn(`LLM result was not a JSON array; preview: ${preview(rawContent)}`);
             return [];
         }
         return parsed;
     } catch (error) {
-        console.warn(`Could not parse LLM result: ${error}\nraw content was: ${rawContent}`);
+        console.warn(`Could not parse LLM result: ${error}\nraw content preview: ${preview(rawContent)}`);
         return [];
     }
 }
@@ -42,5 +52,5 @@ async function describeError(response) {
 }
 
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = {stripJsonFence, parseLlmSuggestions, describeError};
+    module.exports = {stripJsonFence, parseLlmSuggestions, describeError, preview};
 }
