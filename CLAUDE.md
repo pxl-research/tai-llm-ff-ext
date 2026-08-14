@@ -19,7 +19,7 @@ Reload the add-on from the same page after changing any file.
 
 ## Tests
 
-Requires Node.js 20.19+ (or 22.13+, or 24+). Unit tests cover the pure helper functions (Vitest + jsdom):
+Requires Node.js 22.22.2+ (or 24.15+, or 26+). Unit tests cover the pure helper functions (Vitest + jsdom):
 
 ```
 npm install      # first time only

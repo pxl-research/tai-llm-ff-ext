@@ -10,7 +10,7 @@
     "coverage": "vitest run --coverage --coverage.include=\"scripts/**\" --coverage.include=\"popup/**\""
   },
   "engines": {
-    "node": "^20.19.0 || ^22.13.0 || >=24.0.0"
+    "node": "^22.22.2 || ^24.15.0 || >=26.0.0"
   },
   "devDependencies": {
     "@vitest/coverage-v8": "^4.1.10",
