@@ -72,7 +72,7 @@ is shown in a banner instead of failing silently.
 
 ## Development
 
-Running the tests requires **Node.js 20.19+** (or 22.13+, or 24+), per the
+Running the tests requires **Node.js 22.22.2+** (or 24.15+, or 26+), per the
 Vitest/jsdom toolchain.
 
 ```bash

@@ -19,12 +19,13 @@ Reload the add-on from the same page after changing any file.
 
 ## Tests
 
-Unit tests cover the pure helper functions (Vitest + jsdom):
+Requires Node.js 22.22.2+ (or 24.15+, or 26+). Unit tests cover the pure helper functions (Vitest + jsdom):
 
 ```
 npm install      # first time only
 npm test         # run once
 npm run test:watch
+npx vitest run tests/dom_tools.test.js   # run a single test file
 ```
 
 Tests live in `tests/` and cover `scripts/dom_tools.js` (`domToJson`, `getDomPath`, `getChildIndex`) and `scripts/llm_response.js` (`stripJsonFence`, `parseLlmSuggestions`, `describeError`, `preview`). Run `npm run coverage` for a v8 coverage report under `coverage/` (output is `.gitignore`d).
